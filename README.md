@@ -1,6 +1,9 @@
 # CodeDesk
 
-CodeDesk is an open-source coding profile tracker and DSA preparation hub being built for **GirlScript Summer of Code**.
+CodeDesk is a full-stack web application designed to help developers and learners stay organized, track progress, and master coding platforms effectively. It brings together the best resources, educators, and structured question sheets in one clean and interactive interface.
+
+🔮 Coming Soon: AI-Powered Performance Tracking!
+An intelligent system to analyze user activity and visualize progress with interactive graphs.
 
 This monorepo contains two workspaces:
 
