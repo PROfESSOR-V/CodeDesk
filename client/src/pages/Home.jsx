@@ -1,6 +1,19 @@
 import DashboardCard from "../components/DashboardCard.jsx";
+import { useEffect } from "react";
+import anime from "animejs";
 
 export default function Home() {
+  useEffect(() => {
+    anime({
+      targets: ".dashboard-card",
+      opacity: [0, 1],
+      translateY: [20, 0],
+      duration: 800,
+      easing: "easeOutQuart",
+      delay: anime.stagger(100),
+    });
+  }, []);
+
   const dashboardStats = [
     { title: "Total Questions", value: 0 },
     { title: "Completed Questions", value: 0 },

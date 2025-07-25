@@ -6,8 +6,36 @@ import cfLogo from "../assests/codeforces-logo.png";
 import gfgLogo from "../assests/gfg-logo.png";
 import ccLogo from "../assests/codechef-logo.jpeg";
 import hrLogo from "../assests/hackerrank-logo.jpeg";
+import { useEffect, useRef } from "react";
+import anime from "animejs";
 
 export default function Landing() {
+  const heroRef = useRef(null);
+  const platformRef = useRef(null);
+
+  useEffect(() => {
+    if (heroRef.current) {
+      anime({
+        targets: heroRef.current.children,
+        opacity: [0, 1],
+        translateY: [50, 0],
+        duration: 1000,
+        easing: "easeOutExpo",
+        delay: anime.stagger(100),
+      });
+    }
+
+    if (platformRef.current) {
+      anime({
+        targets: platformRef.current.querySelectorAll("img"),
+        scale: [0, 1],
+        duration: 800,
+        easing: "easeOutBack",
+        delay: anime.stagger(100, { start: 500 }),
+      });
+    }
+  }, []);
+
   const platformLogos = [
     { src: lcLogo, alt: "LeetCode" },
     { src: cfLogo, alt: "Codeforces" },
@@ -20,7 +48,7 @@ export default function Landing() {
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="flex flex-col-reverse lg:flex-row items-center gap-12 px-6 py-20 max-w-6xl mx-auto">
+      <section ref={heroRef} className="flex flex-col-reverse lg:flex-row items-center gap-12 px-6 py-20 max-w-6xl mx-auto">
         {/* Text */}
         <div className="flex-1">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-6 text-[#e67829]">
@@ -56,7 +84,7 @@ export default function Landing() {
           <p className="text-gray-600 mb-4">
             Streamlined in <BrandName /> to simplify your coding journey
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
+          <div ref={platformRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
             {platformLogos.map(({ src, alt }) => (
               <img
                 key={alt}
