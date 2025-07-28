@@ -1,32 +1,27 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { connectDB } from "./config/db.js";
+// Mongo connection removed
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 // Route files
-import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
-import educatorRoutes from "./routes/educatorRoutes.js";
-import sheetRoutes from "./routes/sheetRoutes.js";
-import questionRoutes from "./routes/questionRoutes.js";
+// Removed legacy Mongo routes
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // API Routes
-app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
-app.use("/api/educators", educatorRoutes);
-app.use("/api/sheets", sheetRoutes);
-app.use("/api/questions", questionRoutes);
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));

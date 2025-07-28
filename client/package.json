@@ -12,7 +12,8 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
     "react-router-dom": "^6.19.0",
-    "animejs": "^3.2.1"
+    "animejs": "^3.2.1",
+    "@supabase/supabase-js": "^2.42.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",

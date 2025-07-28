@@ -1,8 +1,11 @@
-export default function BrandName({ className = "" }) {
+export default function BrandName({ className = "", variant = "default" }) {
+  const isWhite = variant === "white";
+  const codeColor = isWhite ? "text-white" : "text-black";
+  const deskColor = isWhite ? "text-white" : "text-[#e67829]";
   return (
     <span className={className}>
-      <span className="text-black">Code</span>
-      <span className="text-[#e67829]">Desk</span>
+      <span className={codeColor}>Code</span>
+      <span className={deskColor}>Desk</span>
     </span>
   );
 } 
