@@ -21,7 +21,7 @@ This monorepo contains two workspaces:
 ## Getting Started (Backend)
 
 1. `cd backend`
-2. `cp .env.example .env` – update `MONGO_URI` & `JWT_SECRET`.
+2. `cp .env.example .env` – update `SUPABASE_KEY` & `SUPABASE_URL_KEY`.
 3. `npm install`
 4. `npm run dev` – starts API on <http://localhost:5000>
 
@@ -35,8 +35,9 @@ npm run seed
 ## Getting Started (Frontend)
 
 1. `cd client`
-2. `npm install`
-3. `npm run dev` – opens Vite dev server on <http://localhost:3000>
+2. make .env file with `SUPABASE_API_KEY` & `SUPABASE_URL`
+3. `npm install`
+4. `npm run dev` – opens Vite dev server on <http://localhost:3000>
 
 ---
 ## Contributing
