@@ -21,21 +21,15 @@ This monorepo contains two workspaces:
 ## Getting Started (Backend)
 
 1. `cd backend`
-2. `cp .env.example .env` – update `SUPABASE_KEY` & `SUPABASE_URL_KEY`.
+2. `cp .env.example .env` – update `SUPABASE_URL` & `SUPABASE_SERVICE_ROLE_KEY`.
 3. `npm install`
 4. `npm run dev` – starts API on <http://localhost:5000>
-
-Seed dummy data:
-
-```bash
-npm run seed
-```
 
 ---
 ## Getting Started (Frontend)
 
 1. `cd client`
-2. make .env file with `SUPABASE_API_KEY` & `SUPABASE_URL`
+2. make .env file with `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` & `VITE_API_URL=http://localhost:3000`
 3. `npm install`
 4. `npm run dev` – opens Vite dev server on <http://localhost:3000>
 
