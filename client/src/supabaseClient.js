@@ -14,7 +14,7 @@ console.log('Supabase Key (first 10 chars):', supabaseAnonKey?.substring(0, 10))
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
-    persistSession: true,
+    persistSession: true,  // persist session in storage to retain auth token
     detectSessionInUrl: true,
     storageKey: 'codedesk_auth',
     flowType: 'pkce'

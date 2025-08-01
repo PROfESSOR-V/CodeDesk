@@ -11,7 +11,10 @@ router.post('/init-verify', protect, async (req, res) => {
     try {
         const { platformId, profileUrl } = req.body;
 
+        console.log("Received request payload:", { platformId, profileUrl });
+
         if (!platformId || !profileUrl) {
+            console.error("Validation error: Missing platformId or profileUrl");
             return res.status(400).json({
                 success: false,
                 message: 'Please provide platformId and profileUrl'
@@ -20,6 +23,7 @@ router.post('/init-verify', protect, async (req, res) => {
 
         // Basic URL validation
         if (!profileUrl.includes(platformId.toLowerCase())) {
+            console.error(`Validation error: Invalid ${platformId} profile URL`);
             return res.status(400).json({
                 success: false,
                 message: `Invalid ${platformId} profile URL. Please provide a valid profile URL.`
@@ -30,6 +34,7 @@ router.post('/init-verify', protect, async (req, res) => {
         try {
             new URL(profileUrl);
         } catch (e) {
+            console.error("Validation error: Invalid profile URL format", e);
             return res.status(400).json({
                 success: false,
                 message: 'Invalid profile URL format'
@@ -47,8 +52,20 @@ router.post('/init-verify', protect, async (req, res) => {
             verificationCode += numbers.charAt(Math.floor(Math.random() * numbers.length));
         }
 
+        console.log("Generated verification code:", verificationCode);
+
         // Create or update verification record
-        await createVerification(req.user.id, platformId, profileUrl, verificationCode);
+        try {
+            await createVerification(req.user.id, platformId, profileUrl, verificationCode);
+            console.log("Verification record created successfully");
+        } catch (dbError) {
+            console.error("Database error while creating verification record:", dbError);
+            return res.status(500).json({
+                success: false,
+                message: 'Error creating verification record',
+                error: dbError.message
+            });
+        }
 
         res.json({
             success: true,
@@ -132,3 +149,5 @@ router.post('/verify-platform', protect, async (req, res) => {
         });
     }
 });
+
+export default router;

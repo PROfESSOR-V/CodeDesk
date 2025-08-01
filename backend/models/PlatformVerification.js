@@ -2,21 +2,53 @@ import { supabaseAdmin } from '../utils/supabaseClient.js';
 
 const TABLE_NAME = 'platform_verifications';
 
+// Create or update a verification record for a given user & platform
 export async function createVerification(userId, platformId, profileUrl, verificationCode) {
-    const { data, error } = await supabaseAdmin
+    // Supabase upsert with composite keys can be finicky depending on the table
+    // definition.  We fallback to: if row exists – update, otherwise insert.
+
+    // Check if a verification row already exists
+    const { data: existing, error: fetchError } = await supabaseAdmin
         .from(TABLE_NAME)
-        .insert([{
-            user_id: userId,
-            platform_id: platformId,
-            profile_url: profileUrl,
-            verification_code: verificationCode,
-            verified: false,
-            attempts: 0,
-            created_at: new Date().toISOString()
-        }]);
+        .select('id')
+        .match({ user_id: userId, platform_id: platformId })
+        .maybeSingle();
+
+    if (fetchError) {
+        console.error('Error checking existing verification:', fetchError);
+        throw fetchError;
+    }
+
+    let data, error;
+    if (existing) {
+        // Update existing record
+        ({ data, error } = await supabaseAdmin
+            .from(TABLE_NAME)
+            .update({
+                profile_url: profileUrl,
+                verification_code: verificationCode,
+                verified: false,
+                attempts: 0,
+                created_at: new Date().toISOString(),
+            })
+            .match({ id: existing.id }));
+    } else {
+        // Insert new record
+        ({ data, error } = await supabaseAdmin
+            .from(TABLE_NAME)
+            .insert([{ 
+                user_id: userId,
+                platform_id: platformId,
+                profile_url: profileUrl,
+                verification_code: verificationCode,
+                verified: false,
+                attempts: 0,
+                created_at: new Date().toISOString(),
+            }]));
+    }
 
     if (error) {
-        console.error('Error creating verification:', error);
+        console.error('Error creating/upserting verification:', error);
         throw error;
     }
 

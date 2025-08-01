@@ -34,6 +34,20 @@ export default function Sidebar({ open = true }) {
   const translateClass = "translate-x-0"; // always on screen
   const classes = `${widthClass} bg-white border-r h-screen fixed overflow-y-auto transform transition-all duration-300 md:block ${translateClass}`;
 
+  const handleMenuClick = (label) => {
+    switch(label) {
+      case 'Home':
+        navigate('/dashboard');
+        break;
+      case 'Portfolio':
+        navigate('/portfolio');
+        break;
+      default:
+        // Other menu items not implemented yet
+        break;
+    }
+  };
+
   return (
     <aside className={classes}>
       <div className={`p-4 text-2xl font-bold flex items-center ${open ? 'gap-2' : 'justify-center'}`}>
@@ -54,6 +68,7 @@ export default function Sidebar({ open = true }) {
           ) : (
             <button
               key={idx}
+              onClick={() => handleMenuClick(item.label)}
               className={`w-full flex items-center gap-1.5 py-2 px-3 rounded hover:bg-gray-100 text-gray-700 ${open ? '' : 'justify-center'}`}
             >
               <span className="text-base">{item.icon}</span>

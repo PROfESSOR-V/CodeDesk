@@ -48,19 +48,31 @@ export default function Login() {
         } else {
           const user = data?.user;
           try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sync`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ supabaseId: user.id, email: user.email, name: user.user_metadata?.name || "" }),
-            });
-            const dataSync = await res.json();
-            if (dataSync.token) localStorage.setItem("token", dataSync.token);
+            // Attempt to sync the Supabase user with backend (optional)
+            try {
+              const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sync`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ supabaseId: user.id, email: user.email, name: user.user_metadata?.name || "" }),
+              });
+
+              if (res.ok) {
+                // Only attempt JSON parsing if server sent a body
+                const text = await res.text();
+                if (text) {
+                  const dataSync = JSON.parse(text);
+                  // backend returns token for legacy clients; we ignore to keep session only in Supabase
+                }
+              } else {
+                console.warn("/api/users/sync returned", res.status);
+              }
+            } catch (syncErr) {
+              console.error("Sync failed", syncErr);
+            }
           } catch (e) {
             console.error("Sync failed", e);
           }
-          if(data?.session?.access_token){
-            localStorage.setItem("token", data.session.access_token);
-          }
+          // No longer persisting token in browser storage – rely on Supabase session
           navigate("/dashboard");
         }
       })

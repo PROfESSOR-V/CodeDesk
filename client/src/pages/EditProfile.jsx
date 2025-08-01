@@ -26,6 +26,7 @@ export default function EditProfile() {
   const [active, setActive] = useState("basic");
   const [profile, setProfile] = useState(null);
   const mainRef = useRef(null);
+  const [tokenState, setTokenState] = useState("");
 
   // Check authentication on component mount
   useEffect(() => {
@@ -40,16 +41,18 @@ export default function EditProfile() {
 
   // Set up auth state listener
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) setTokenState(session.access_token);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate('/login');
+      if (session?.access_token) {
+        setTokenState(session.access_token);
+      } else {
+        setTokenState("");
       }
     });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+    return () => subscription.unsubscribe();
+  }, []);
 
   // fetch profile
   useEffect(() => {
@@ -140,7 +143,7 @@ export default function EditProfile() {
         {active === "education" && <Education profile={profile} />}
         {active === "achievements" && <Achievements profile={profile} />}
         {active === "work" && <WorkExperience profile={profile} />}
-        {active === "platforms" && <Platforms profile={profile} />}
+        {active === "platforms" && <Platforms profile={profile} tokenState={tokenState} />}
         {active === "accounts" && <Accounts profile={profile} />}
         {active === "security" && <VisibilitySection profile={profile} />}
       </div>
@@ -200,9 +203,10 @@ function BasicInfo({ profile }) {
   }, [profile]);
 
   const save = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
     await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
       body: JSON.stringify({ firstName: first, lastName: last, bio, country }),
     });
     alert("Profile updated");
@@ -555,7 +559,7 @@ function WorkExperience({ profile }) {
   );
 }
 
-function Platforms({ profile }) {
+function Platforms({ profile, tokenState }) {
   const initial = [
     { id: "leetcode", label: "LeetCode", url: "", verified: false },
     { id: "codeforces", label: "Codeforces", url: "", verified: false },
@@ -592,56 +596,154 @@ function Platforms({ profile }) {
   const [verifyTarget, setVerifyTarget] = useState(null);
   const [token, setToken] = useState("");
 
-  const update = (id, val) => {
-    setProfiles((p) => p.map((pl) => (pl.id === id ? { ...pl, url: val } : pl)));
+  const baseUrls = {
+    leetcode: "https://leetcode.com/u/",
+    codeforces: "https://codeforces.com/profile/",
+    gfg: "https://auth.geeksforgeeks.org/user/",
+    codechef: "https://www.codechef.com/users/",
+    hackerrank: "https://www.hackerrank.com/profile/",
   };
 
-  const openVerifyModal = (id) => {
-    // Generate a verification code that starts with letters and ends with numbers
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = '0123456789';
-    let code = '';
-    // Add 3 random letters
-    for(let i = 0; i < 3; i++) {
-      code += letters.charAt(Math.floor(Math.random() * letters.length));
-    }
-    // Add 3 random numbers
-    for(let i = 0; i < 3; i++) {
-      code += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    }
-    setToken(code);
-    setVerifyTarget(id);
-    setModalOpen(true);
+  const update = (id, username) => {
+    setProfiles((p) => p.map((pl) => (
+      pl.id === id ? { ...pl, url: `${baseUrls[id]}${username}` } : pl
+    )));
   };
 
-  const verifyPlatformProfile = async (platformId, url, verificationCode) => {
+  const openVerifyModal = async (id) => {
     try {
-      // Get the platform profile info based on the URL
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        alert('Please log in again');
-        return false;
+      const platform = profiles.find((p) => p.id === id);
+      if (!platform || !platform.url) {
+        throw new Error("Please enter your profile URL first");
       }
 
-      const res = await fetch('http://localhost:5000/api/users/verify-platform', {
+      // If user entered only username, build full URL automatically
+      let fullUrl = platform.url.trim();
+      if (!fullUrl.startsWith("http")) {
+        switch (id) {
+          case "leetcode":
+            fullUrl = `https://leetcode.com/u/${fullUrl}`;
+            break;
+          case "codeforces":
+            fullUrl = `https://codeforces.com/profile/${fullUrl}`;
+            break;
+          case "gfg":
+            fullUrl = `https://auth.geeksforgeeks.org/user/${fullUrl}`;
+            break;
+          case "codechef":
+            fullUrl = `https://www.codechef.com/users/${fullUrl}`;
+            break;
+          case "hackerrank":
+            fullUrl = `https://www.hackerrank.com/profile/${fullUrl}`;
+            break;
+          default:
+            break;
+        }
+      }
+
+      // Persist constructed URL back into state so user sees it
+      setProfiles(p => p.map(pl => pl.id === id ? { ...pl, url: fullUrl } : pl));
+
+      console.log("Initializing verification for platform:", platform);
+
+      let accessToken = tokenState;
+      if (!accessToken) {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/login";
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/api/verification/init", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          platformId,
+          platformId: id,
+          profileUrl: platform.url,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error initializing verification");
+      }
+
+      const data = await response.json();
+      console.log("Verification initialized successfully:", data);
+
+      // Save verification details so the modal & follow-up call can use them
+      setToken(data.verificationCode);
+      setVerifyTarget(id);
+      setModalOpen(true);
+    } catch (err) {
+      console.error("Verification initialization error:", err);
+      alert(err.message || "An unexpected error occurred during verification initialization");
+    }
+  };
+
+  const verifyPlatformProfile = async (url, verificationCode) => {
+    try {
+      // Get the platform profile info based on the URL
+      let accessToken = tokenState;
+      if (!accessToken) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          accessToken = session.access_token;
+        } else {
+          console.error('No active session found');
+          throw new Error('Session expired. Please log in again.');
+        }
+      }
+
+      console.log('Starting verification with:', {
+        profileUrl: url,
+        verificationCode
+      });
+
+      // Attempt to verify the profile by searching for code on the page
+      const res = await fetch('http://localhost:5000/api/verification/confirm', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          platformId: verifyTarget,
           profileUrl: url,
           verificationCode
         }),
       });
 
-      if (!res.ok) {
-        throw new Error(`Verification failed: ${res.status}`);
+      let data;
+      try {
+        data = await res.json();
+        console.log('Verification response:', data);
+      } catch (error) {
+        console.error('Error parsing verification response:', error);
+        throw new Error('Invalid response from verification service');
       }
 
-      const data = await res.json();
-      return data.verified;
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('Profile not found. Please check your profile URL.');
+        } else if (res.status === 401) {
+          throw new Error('Session expired. Please log in again.');
+        } else if (res.status === 400) {
+          throw new Error(data.message || 'Verification failed. Please make sure you have updated your display name.');
+        } else {
+          throw new Error(data.message || `Verification failed: ${data.error || res.status}`);
+        }
+      }
+
+      // Validate verification response format
+      if (!data || (typeof data.verified === 'undefined' && typeof data.status !== 'string')) {
+        throw new Error('Invalid verification response format');
+      }
+
+      // Some endpoints return {verified:true}, others {status:'verified'}
+      return data.verified === true;
     } catch (error) {
       console.error('Error verifying platform:', error);
       return false;
@@ -650,8 +752,8 @@ function Platforms({ profile }) {
 
   const removePlatform = async (platformName) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const accessToken = tokenState;
+      if (!accessToken) {
         alert('Please log in again');
         return;
       }
@@ -660,7 +762,7 @@ function Platforms({ profile }) {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           platformName
@@ -688,38 +790,58 @@ function Platforms({ profile }) {
   };
 
   const confirmVerification = async () => {
-    const platform = profiles.find(p => p.id === verifyTarget);
-    if (!platform) {
-      alert('Platform not found');
-      return;
-    }
+    try {
+      const platform = profiles.find(p => p.id === verifyTarget);
+      if (!platform) {
+        throw new Error('Selected platform not found');
+      }
 
-    if (!platform.url) {
-      alert('Please enter your profile URL first');
-      return;
-    }
+      if (!platform.url) {
+        throw new Error('Please enter your profile URL first');
+      }
 
-    // Show loading state
-    const button = document.querySelector('#verifyButton');
-    if (button) {
-      button.disabled = true;
-      button.textContent = 'Verifying...';
-    }
+      if (!token) {
+        throw new Error('Verification code not found. Please try again.');
+      }
 
-    const isVerified = await verifyPlatformProfile(platform.id, platform.url, token);
+      // Update UI to show verification in progress
+      const button = document.querySelector('#verifyButton');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Verifying...';
+      }
 
-    if (isVerified) {
-      setProfiles((p) => p.map((pl) => (pl.id === verifyTarget ? { ...pl, verified: true } : pl)));
-      alert('Profile verified successfully!');
-      setModalOpen(false);
-    } else {
-      alert('Verification failed. Please make sure you have updated your profile name on ' + platform.label);
-    }
+      // Wait for profile update to propagate
+      const delay = 5000; // 5 seconds delay
+      console.log(`Waiting ${delay}ms for profile update to propagate...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
 
-    // Reset button state
-    if (button) {
-      button.disabled = false;
-      button.textContent = 'Verify';
+      console.log('Starting verification process for', platform.label);
+      const isVerified = await verifyPlatformProfile(platform.url, token);
+      console.log('Verification result:', isVerified);
+
+      if (isVerified) {
+        // Update local state
+        setProfiles((p) => p.map((pl) => 
+          pl.id === verifyTarget ? { ...pl, verified: true } : pl
+        ));
+        
+        // Show success message
+        alert(`${platform.label} profile verified successfully!`);
+        setModalOpen(false);
+      } else {
+        throw new Error(`Verification failed. Please ensure:\n\n1. You've updated your ${platform.label} profile name to: ${token}\n2. The changes are saved and public\n3. The profile URL is correct`);
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      alert(error.message);
+    } finally {
+      // Reset button state
+      const button = document.querySelector('#verifyButton');
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Verify';
+      }
     }
   };
 
@@ -738,12 +860,17 @@ function Platforms({ profile }) {
             {profiles.map((p) => (
               <div key={p.id} className="flex items-center gap-3">
                 <span className="w-32">{p.label}</span>
-            <input
-              value={p.url}
-              onChange={(e) => update(p.id, e.target.value)}
-              placeholder={`https://.../${p.id}`}
-              className="flex-1 border rounded px-2 py-1"
-            />
+            <div className="flex-1 flex">
+              <span className="px-2 py-1 border border-r-0 rounded-l bg-gray-100 text-gray-600 text-sm select-none">
+                {baseUrls[p.id]}
+              </span>
+              <input
+                value={p.url.replace(baseUrls[p.id], "")}
+                onChange={(e) => update(p.id, e.target.value)}
+                placeholder="username"
+                className="flex-1 border rounded-r px-2 py-1"
+              />
+            </div>
             {p.verified ? (
               <div className="flex items-center gap-2">
                 <span className="text-green-600 text-xl">&#10003;</span>
@@ -774,8 +901,8 @@ function Platforms({ profile }) {
         onClick={async () => {
           try {
             console.log("Saving platforms:", profiles); // Debug log
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            const accessToken = tokenState;
+            if (!accessToken) {
               alert('Please log in again');
               return;
             }
@@ -784,7 +911,7 @@ function Platforms({ profile }) {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
+                Authorization: `Bearer ${accessToken}`,
               },
               body: JSON.stringify({ platforms: profiles }),
             });
@@ -798,7 +925,7 @@ function Platforms({ profile }) {
             // Refresh the profile data to show updated information
             const profileRes = await fetch('http://localhost:5000/api/users/profile', {
               headers: {
-                Authorization: `Bearer ${session.access_token}`,
+                Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
               },
             });
@@ -929,7 +1056,7 @@ function Accounts({ profile }) {
                 method: "PUT",
                 headers: { 
                   "Content-Type": "application/json", 
-                  Authorization: `Bearer ${localStorage.getItem("token")}` 
+                  Authorization: `Bearer ${tokenState}` 
                 },
                 body: JSON.stringify({ username }),
               });

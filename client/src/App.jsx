@@ -4,6 +4,7 @@ import DashboardLayout from "./components/DashboardLayout.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
+import Portfolio from "./pages/Portfolio.jsx";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile/edit" element={<EditProfile />} />
+        <Route path="/portfolio" element={<Portfolio />} />
       </Routes>
     </Router>
   );

@@ -7,6 +7,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 // Route files
 import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
+import verificationRoutes from "./routes/verificationRoutes.js";
 // Removed legacy Mongo routes
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.json());
 // API Routes
 app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
+app.use("/api/verification", verificationRoutes);
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
