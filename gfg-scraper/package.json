@@ -1,0 +1,21 @@
+{
+  "name": "gfg-scraper",
+  "version": "1.0.0",
+  "description": "Service that scrapes GeeksforGeeks user profile and stores stats in Supabase gfg_stats table.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.53.0",
+    "dotenv": "^17.2.1",
+    "express": "^4.21.2",
+    "puppeteer": "^22.15.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
