@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import { protect } from "../middleware/authMiddleware.js";
 import { supabaseAdmin } from "../utils/supabaseClient.js";
 import { getPlatformStats } from "../utils/platformStats.js";
+import { aggregatePortfolio } from "../utils/aggregatePortfolio.js";
+import { upsertPlatformStats } from "../utils/platformTables.js";
 
 dotenv.config();
 
@@ -218,7 +220,24 @@ router.post("/confirm", protect, async (req, res) => {
         console.error("Supabase upsert error", upsertErr);
         return res.status(500).json({ message: "Database error" });
       }
-      return res.json({ verified: true, stats: statsObj });
+      // Recalculate aggregated portfolio stats after successful verification
+      const { data: updatedProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("platforms")
+        .eq("supabase_id", req.user.id)
+        .single();
+
+      // Store detailed stats into dedicated *_stats table
+      await upsertPlatformStats(platformId, req.user.id, statsObj);
+
+      const portfolioData = aggregatePortfolio(updatedProfile?.platforms || [], { id: req.user.id });
+
+      await supabaseAdmin
+        .from("profiles")
+        .update({ portfolio: portfolioData.aggregatedStats })
+        .eq("supabase_id", req.user.id);
+
+      return res.json({ verified: true, stats: statsObj, aggregated: portfolioData.aggregatedStats });
     } else {
       // Remove the temp entry to allow user to try again
       const updated = existing.filter((p) => p.id !== platformId);

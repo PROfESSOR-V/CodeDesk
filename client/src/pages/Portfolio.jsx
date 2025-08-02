@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import DashboardLayout from '../components/DashboardLayout';
+import ContributionHeatmap from '../components/ContributionHeatmap';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 
@@ -44,6 +45,23 @@ const Portfolio = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Portfolio data received:', data);
+        // normalise fields for UI components
+        if (data?.aggregatedStats) {
+          const agg = data.aggregatedStats;
+          const totalRating = Array.isArray(agg.rating)
+            ? agg.rating.reduce((n, r) => n + (parseInt(r.rating) || 0), 0)
+            : agg.rating || 0;
+          data.aggregatedStats = {
+            ...agg,
+            totalRating,
+            totalActiveDays: data.unifiedActivity?.length || 0,
+            problemDifficulty: {
+              easy: agg.easy ?? 0,
+              medium: agg.medium ?? 0,
+              hard: agg.hard ?? 0,
+            },
+          };
+        }
         setPortfolioData(data);
       } else {
         const errorData = await response.text();
@@ -150,12 +168,9 @@ const Portfolio = () => {
                 <ActiveDaysCard stats={portfolioData.aggregatedStats || {}} />
               </div>
 
-              {/* Contribution Graph - full width */}
-              <ContributionGraphCard 
-                contributionData={portfolioData.contributionData || {}}
-                unifiedActivity={portfolioData.unifiedActivity || []}
-                selectedYear={selectedYear}
-                onYearChange={setSelectedYear}
+              {/* Contribution Heatmap */}
+              <ContributionHeatmap 
+                activity={portfolioData.unifiedActivity || []}
               />
 
               {/* Contest Card */}
@@ -339,11 +354,19 @@ const ContributionGraphCard = ({ contributionData, unifiedActivity = [], selecte
   console.log('Unified activity length', unifiedActivity.length, unifiedActivity.slice(0,5));
   const firstGraph = Object.values(contributionData)[0];
   const graphHtml = firstGraph?.html || null;
-  const heatmapData = unifiedActivity.filter(item => new Date(item.date).getFullYear() === selectedYear);
-  console.log('Heatmap data for year', selectedYear, heatmapData.length);
 
   const startDate = new Date(`${selectedYear}-01-01`);
   const endDate = new Date(`${selectedYear}-12-31`);
+
+  // Build complete dataset for the selected year (fill missing days with 0 submissions)
+  const activityMap = new Map(unifiedActivity.map(({ date, count }) => [date, count]));
+  const tempData = [];
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const isoDate = d.toISOString().slice(0,10);
+    tempData.push({ date: isoDate, count: activityMap.get(isoDate) || 0 });
+  }
+  const heatmapData = tempData;
+  console.log('Heatmap data for year', selectedYear, heatmapData.length);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -409,25 +432,58 @@ const RatingCard = ({ stats }) => (
   </div>
 );
 
-const ProblemSummaryCard = ({ stats }) => (
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <h3 className="text-lg font-medium text-gray-900 mb-4">Problem Solved Summary</h3>
-    <div className="space-y-2">
-      <div className="flex justify-between">
-        <span className="text-green-600">Easy</span>
-        <span className="font-medium">{stats.problemDifficulty?.easy || 0}</span>
+const ProblemSummaryCard = ({ stats }) => {
+  const data = [
+    { label: 'Easy', value: stats.problemDifficulty?.easy || 0, color: '#22c55e' },
+    { label: 'Medium', value: stats.problemDifficulty?.medium || 0, color: '#facc15' },
+    { label: 'Hard', value: stats.problemDifficulty?.hard || 0, color: '#ef4444' },
+  ];
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  let accumulated = 0;
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Problem Difficulty Breakdown</h3>
+      <div className="flex items-center justify-center">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          {/* background circle */}
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="18" />
+          {data.map((d, idx) => {
+            const dashArray = total === 0 ? 0 : (d.value / total) * circumference;
+            const dashOffset = circumference - accumulated;
+            accumulated += dashArray;
+            return (
+              <circle
+                key={idx}
+                cx="60" cy="60" r={radius}
+                fill="none"
+                stroke={d.color}
+                strokeWidth="18"
+                strokeDasharray={`${dashArray} ${circumference - dashArray}`}
+                strokeDashoffset={dashOffset}
+                strokeLinecap="butt"
+              />
+            );
+          })}
+        </svg>
       </div>
-      <div className="flex justify-between">
-        <span className="text-yellow-600">Medium</span>
-        <span className="font-medium">{stats.problemDifficulty?.medium || 0}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-red-600">Hard</span>
-        <span className="font-medium">{stats.problemDifficulty?.hard || 0}</span>
+      <div className="mt-4 space-y-1 text-sm">
+        {data.map(d => (
+          <div key={d.label} className="flex items-center justify-between">
+            <span className="flex items-center">
+              <span className="w-3 h-3 inline-block mr-2 rounded-full" style={{ backgroundColor: d.color }}></span>
+              {d.label}
+            </span>
+            <span className="font-medium">{d.value}</span>
+          </div>
+        ))}
       </div>
     </div>
-  </div>
-);
+  );
+};
+
 
 const ContestRatingCard = ({ contestRatings }) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

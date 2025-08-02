@@ -1,8 +1,11 @@
 import DashboardCard from "../components/DashboardCard.jsx";
-import { useEffect } from "react";
+import ContributionHeatmap from "../components/ContributionHeatmap";
+import { useEffect, useState } from "react";
 import anime from "animejs";
+import { supabase } from "../supabaseClient";
 
 export default function Home() {
+  // Animation for cards
   useEffect(() => {
     anime({
       targets: ".dashboard-card",
@@ -12,6 +15,32 @@ export default function Home() {
       easing: "easeOutQuart",
       delay: anime.stagger(100),
     });
+  }, []);
+
+  // ----------------------------------------------------------
+  // Fetch unified activity for heatmap
+  // ----------------------------------------------------------
+  const [activity, setActivity] = useState([]);
+  useEffect(() => {
+    const fetchActivity = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const res = await fetch("http://localhost:5000/api/users/portfolio", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setActivity(data.unifiedActivity || []);
+        }
+      } catch (err) {
+        console.error("Error fetching activity", err);
+      }
+    };
+    fetchActivity();
   }, []);
 
   const dashboardStats = [
@@ -50,11 +79,8 @@ export default function Home() {
             </li>
           </ul>
         </div>
-        {/* Calendar placeholder */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <p className="font-medium mb-4">Calendar</p>
-          <p className="text-gray-400 text-sm">Calendar integration coming soon</p>
-        </div>
+        {/* Contribution Heatmap */}
+        <ContributionHeatmap activity={activity} />
       </div>
     </div>
   );

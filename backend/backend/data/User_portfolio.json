@@ -1,0 +1,938 @@
+{
+  "user": {
+    "id": "25af9441-a97d-47b6-be7f-22551947254e",
+    "username": "User",
+    "email": "vipulagarwal5578@gmail.com",
+    "fullName": "Vipul Agarwal",
+    "profilePicture": null,
+    "country": null,
+    "createdAt": "2025-07-26T05:47:04.952614+00:00"
+  },
+  "verifiedPlatforms": [
+    {
+      "platform": "leetcode",
+      "username": "vipul8055",
+      "stats": {
+        "badges": [],
+        "rating": 1414,
+        "platform": "leetcode",
+        "username": "vipul8055",
+        "fetchedAt": "2025-08-02T10:57:51.951Z",
+        "easySolved": 43,
+        "hardSolved": 6,
+        "todayCount": 0,
+        "displayName": "vipul8055",
+        "totalSolved": 95,
+        "mediumSolved": 46,
+        "contestRating": 1414,
+        "contributionData": [
+          {
+            "date": "2024-08-02",
+            "count": 1
+          },
+          {
+            "date": "2024-08-03",
+            "count": 1
+          },
+          {
+            "date": "2024-08-04",
+            "count": 1
+          },
+          {
+            "date": "2024-08-05",
+            "count": 1
+          },
+          {
+            "date": "2024-08-06",
+            "count": 1
+          },
+          {
+            "date": "2024-08-07",
+            "count": 1
+          },
+          {
+            "date": "2024-08-08",
+            "count": 1
+          },
+          {
+            "date": "2024-08-09",
+            "count": 1
+          },
+          {
+            "date": "2024-08-10",
+            "count": 1
+          },
+          {
+            "date": "2024-08-12",
+            "count": 1
+          },
+          {
+            "date": "2024-08-17",
+            "count": 1
+          },
+          {
+            "date": "2024-08-18",
+            "count": 1
+          },
+          {
+            "date": "2024-08-23",
+            "count": 1
+          },
+          {
+            "date": "2024-08-25",
+            "count": 1
+          },
+          {
+            "date": "2024-08-26",
+            "count": 1
+          },
+          {
+            "date": "2024-08-27",
+            "count": 1
+          },
+          {
+            "date": "2024-08-28",
+            "count": 2
+          },
+          {
+            "date": "2024-08-29",
+            "count": 1
+          },
+          {
+            "date": "2024-08-30",
+            "count": 1
+          },
+          {
+            "date": "2024-09-01",
+            "count": 3
+          },
+          {
+            "date": "2024-09-02",
+            "count": 1
+          },
+          {
+            "date": "2024-09-03",
+            "count": 1
+          },
+          {
+            "date": "2024-09-04",
+            "count": 1
+          },
+          {
+            "date": "2024-09-06",
+            "count": 1
+          },
+          {
+            "date": "2024-09-09",
+            "count": 1
+          },
+          {
+            "date": "2024-09-11",
+            "count": 1
+          },
+          {
+            "date": "2024-09-16",
+            "count": 2
+          },
+          {
+            "date": "2024-09-19",
+            "count": 1
+          },
+          {
+            "date": "2024-10-02",
+            "count": 1
+          },
+          {
+            "date": "2024-10-04",
+            "count": 1
+          },
+          {
+            "date": "2024-10-05",
+            "count": 1
+          },
+          {
+            "date": "2024-10-08",
+            "count": 1
+          },
+          {
+            "date": "2024-10-10",
+            "count": 1
+          },
+          {
+            "date": "2024-10-12",
+            "count": 1
+          },
+          {
+            "date": "2024-10-13",
+            "count": 1
+          },
+          {
+            "date": "2024-10-14",
+            "count": 1
+          },
+          {
+            "date": "2024-10-17",
+            "count": 1
+          },
+          {
+            "date": "2024-10-19",
+            "count": 1
+          },
+          {
+            "date": "2025-01-15",
+            "count": 19
+          },
+          {
+            "date": "2025-06-07",
+            "count": 10
+          },
+          {
+            "date": "2025-06-09",
+            "count": 8
+          },
+          {
+            "date": "2025-06-10",
+            "count": 5
+          },
+          {
+            "date": "2025-06-11",
+            "count": 1
+          },
+          {
+            "date": "2025-06-12",
+            "count": 3
+          },
+          {
+            "date": "2025-06-14",
+            "count": 1
+          },
+          {
+            "date": "2025-06-15",
+            "count": 44
+          },
+          {
+            "date": "2025-06-16",
+            "count": 1
+          },
+          {
+            "date": "2025-07-09",
+            "count": 7
+          },
+          {
+            "date": "2025-07-10",
+            "count": 2
+          },
+          {
+            "date": "2025-07-11",
+            "count": 1
+          },
+          {
+            "date": "2025-07-14",
+            "count": 1
+          },
+          {
+            "date": "2025-08-01",
+            "count": 1
+          }
+        ],
+        "contestsParticipated": 1
+      },
+      "profileUrl": "https://leetcode.com/u/Vipul8055",
+      "verifiedAt": "2025-08-02T09:55:31.080Z"
+    },
+    {
+      "platform": "gfg",
+      "username": "vipulagaraolg",
+      "stats": {
+        "platform": "gfg",
+        "username": "vipulagaraolg",
+        "fetchedAt": "2025-08-02T10:57:44.968Z",
+        "activeDays": 5,
+        "easySolved": 2,
+        "hardSolved": 1,
+        "todayCount": 0,
+        "displayName": "U89J0H",
+        "totalSolved": 11,
+        "mediumSolved": 7,
+        "contributionData": [
+          {
+            "date": "July 9, 2025",
+            "count": 2
+          },
+          {
+            "date": "July 11, 2025",
+            "count": 1
+          },
+          {
+            "date": "July 12, 2025",
+            "count": 2
+          },
+          {
+            "date": "July 29, 2025",
+            "count": 1
+          },
+          {
+            "date": "August 1, 2025",
+            "count": 2
+          }
+        ],
+        "contestsParticipated": 0
+      },
+      "profileUrl": "https://auth.geeksforgeeks.org/user/vipulagaraolg",
+      "verifiedAt": "2025-08-02T09:59:25.699Z"
+    },
+    {
+      "platform": "codeforces",
+      "username": "PROfESSOR_40",
+      "stats": {
+        "rank": "newbie",
+        "rating": 650,
+        "platform": "codeforces",
+        "username": "PROfESSOR_40",
+        "fetchedAt": "2025-08-02T10:12:46.495Z",
+        "maxRating": 650,
+        "activeDays": 12,
+        "easySolved": 2,
+        "hardSolved": 1,
+        "displayName": "EMSHKB",
+        "totalSolved": 6,
+        "mediumSolved": 2,
+        "contestRating": 650,
+        "contributionData": [
+          {
+            "date": "2025-07-11",
+            "count": 1
+          },
+          {
+            "date": "2025-07-10",
+            "count": 1
+          },
+          {
+            "date": "2025-06-17",
+            "count": 7
+          },
+          {
+            "date": "2025-06-15",
+            "count": 10
+          },
+          {
+            "date": "2025-06-14",
+            "count": 13
+          }
+        ],
+        "contestsParticipated": 2,
+        "contributionGraphHtml": "\n    <div class=\"codeforces-calendar\" style=\"background: white; padding: 16px; border-radius: 8px;\">\n      <div style=\"display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;\">\n        <span><strong>6</strong> problems solved</span>\n        <span>Contests: <strong>2</strong></span>\n        <div>Current: 2024</div>\n      </div>\n      <div style=\"background: #f5f5f5; height: 80px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #666;\">\n        Codeforces Activity Timeline\n      </div>\n    </div>\n  "
+      },
+      "profileUrl": "https://codeforces.com/profile/PROfESSOR_40",
+      "verifiedAt": "2025-08-02T10:01:40.085Z"
+    },
+    {
+      "platform": "codechef",
+      "username": "professor01",
+      "stats": {
+        "badges": [],
+        "rating": 0,
+        "platform": "codechef",
+        "username": "professor01",
+        "fetchedAt": "2025-08-02T10:17:56.103Z",
+        "activeDays": 3,
+        "easySolved": 3,
+        "hardSolved": 1,
+        "todayCount": 0,
+        "displayName": "YFDJQI",
+        "totalSolved": 9,
+        "mediumSolved": 3,
+        "contestRating": 0,
+        "contributionData": [
+          {
+            "date": "2025-8-1",
+            "count": 1
+          },
+          {
+            "date": "2024-6-14",
+            "count": 20
+          },
+          {
+            "date": "2024-6-15",
+            "count": 71
+          }
+        ],
+        "contestsParticipated": 0
+      },
+      "profileUrl": "https://www.codechef.com/users/professor01",
+      "verifiedAt": "2025-08-02T10:03:04.240Z"
+    }
+  ],
+  "aggregatedStats": {
+    "totalQuestions": 121,
+    "totalActiveDays": 61,
+    "totalRating": 2064,
+    "totalContests": 3,
+    "problemDifficulty": {
+      "easy": 50,
+      "medium": 58,
+      "hard": 9
+    }
+  },
+  "contributionData": {
+    "leetcode": {
+      "data": [
+        {
+          "date": "2024-08-02",
+          "count": 1
+        },
+        {
+          "date": "2024-08-03",
+          "count": 1
+        },
+        {
+          "date": "2024-08-04",
+          "count": 1
+        },
+        {
+          "date": "2024-08-05",
+          "count": 1
+        },
+        {
+          "date": "2024-08-06",
+          "count": 1
+        },
+        {
+          "date": "2024-08-07",
+          "count": 1
+        },
+        {
+          "date": "2024-08-08",
+          "count": 1
+        },
+        {
+          "date": "2024-08-09",
+          "count": 1
+        },
+        {
+          "date": "2024-08-10",
+          "count": 1
+        },
+        {
+          "date": "2024-08-12",
+          "count": 1
+        },
+        {
+          "date": "2024-08-17",
+          "count": 1
+        },
+        {
+          "date": "2024-08-18",
+          "count": 1
+        },
+        {
+          "date": "2024-08-23",
+          "count": 1
+        },
+        {
+          "date": "2024-08-25",
+          "count": 1
+        },
+        {
+          "date": "2024-08-26",
+          "count": 1
+        },
+        {
+          "date": "2024-08-27",
+          "count": 1
+        },
+        {
+          "date": "2024-08-28",
+          "count": 2
+        },
+        {
+          "date": "2024-08-29",
+          "count": 1
+        },
+        {
+          "date": "2024-08-30",
+          "count": 1
+        },
+        {
+          "date": "2024-09-01",
+          "count": 3
+        },
+        {
+          "date": "2024-09-02",
+          "count": 1
+        },
+        {
+          "date": "2024-09-03",
+          "count": 1
+        },
+        {
+          "date": "2024-09-04",
+          "count": 1
+        },
+        {
+          "date": "2024-09-06",
+          "count": 1
+        },
+        {
+          "date": "2024-09-09",
+          "count": 1
+        },
+        {
+          "date": "2024-09-11",
+          "count": 1
+        },
+        {
+          "date": "2024-09-16",
+          "count": 2
+        },
+        {
+          "date": "2024-09-19",
+          "count": 1
+        },
+        {
+          "date": "2024-10-02",
+          "count": 1
+        },
+        {
+          "date": "2024-10-04",
+          "count": 1
+        },
+        {
+          "date": "2024-10-05",
+          "count": 1
+        },
+        {
+          "date": "2024-10-08",
+          "count": 1
+        },
+        {
+          "date": "2024-10-10",
+          "count": 1
+        },
+        {
+          "date": "2024-10-12",
+          "count": 1
+        },
+        {
+          "date": "2024-10-13",
+          "count": 1
+        },
+        {
+          "date": "2024-10-14",
+          "count": 1
+        },
+        {
+          "date": "2024-10-17",
+          "count": 1
+        },
+        {
+          "date": "2024-10-19",
+          "count": 1
+        },
+        {
+          "date": "2025-01-15",
+          "count": 19
+        },
+        {
+          "date": "2025-06-07",
+          "count": 10
+        },
+        {
+          "date": "2025-06-09",
+          "count": 8
+        },
+        {
+          "date": "2025-06-10",
+          "count": 5
+        },
+        {
+          "date": "2025-06-11",
+          "count": 1
+        },
+        {
+          "date": "2025-06-12",
+          "count": 3
+        },
+        {
+          "date": "2025-06-14",
+          "count": 1
+        },
+        {
+          "date": "2025-06-15",
+          "count": 44
+        },
+        {
+          "date": "2025-06-16",
+          "count": 1
+        },
+        {
+          "date": "2025-07-09",
+          "count": 7
+        },
+        {
+          "date": "2025-07-10",
+          "count": 2
+        },
+        {
+          "date": "2025-07-11",
+          "count": 1
+        },
+        {
+          "date": "2025-07-14",
+          "count": 1
+        },
+        {
+          "date": "2025-08-01",
+          "count": 1
+        }
+      ]
+    },
+    "gfg": {
+      "data": [
+        {
+          "date": "July 9, 2025",
+          "count": 2
+        },
+        {
+          "date": "July 11, 2025",
+          "count": 1
+        },
+        {
+          "date": "July 12, 2025",
+          "count": 2
+        },
+        {
+          "date": "July 29, 2025",
+          "count": 1
+        },
+        {
+          "date": "August 1, 2025",
+          "count": 2
+        }
+      ]
+    },
+    "codeforces": {
+      "html": "\n    <div class=\"codeforces-calendar\" style=\"background: white; padding: 16px; border-radius: 8px;\">\n      <div style=\"display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;\">\n        <span><strong>6</strong> problems solved</span>\n        <span>Contests: <strong>2</strong></span>\n        <div>Current: 2024</div>\n      </div>\n      <div style=\"background: #f5f5f5; height: 80px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #666;\">\n        Codeforces Activity Timeline\n      </div>\n    </div>\n  ",
+      "data": [
+        {
+          "date": "2025-07-11",
+          "count": 1
+        },
+        {
+          "date": "2025-07-10",
+          "count": 1
+        },
+        {
+          "date": "2025-06-17",
+          "count": 7
+        },
+        {
+          "date": "2025-06-15",
+          "count": 10
+        },
+        {
+          "date": "2025-06-14",
+          "count": 13
+        }
+      ]
+    },
+    "codechef": {
+      "data": [
+        {
+          "date": "2025-8-1",
+          "count": 1
+        },
+        {
+          "date": "2024-6-14",
+          "count": 20
+        },
+        {
+          "date": "2024-6-15",
+          "count": 71
+        }
+      ]
+    }
+  },
+  "unifiedActivity": [
+    {
+      "date": "2024-08-02",
+      "count": 1
+    },
+    {
+      "date": "2024-08-03",
+      "count": 1
+    },
+    {
+      "date": "2024-08-04",
+      "count": 1
+    },
+    {
+      "date": "2024-08-05",
+      "count": 1
+    },
+    {
+      "date": "2024-08-06",
+      "count": 1
+    },
+    {
+      "date": "2024-08-07",
+      "count": 1
+    },
+    {
+      "date": "2024-08-08",
+      "count": 1
+    },
+    {
+      "date": "2024-08-09",
+      "count": 1
+    },
+    {
+      "date": "2024-08-10",
+      "count": 1
+    },
+    {
+      "date": "2024-08-12",
+      "count": 1
+    },
+    {
+      "date": "2024-08-17",
+      "count": 1
+    },
+    {
+      "date": "2024-08-18",
+      "count": 1
+    },
+    {
+      "date": "2024-08-23",
+      "count": 1
+    },
+    {
+      "date": "2024-08-25",
+      "count": 1
+    },
+    {
+      "date": "2024-08-26",
+      "count": 1
+    },
+    {
+      "date": "2024-08-27",
+      "count": 1
+    },
+    {
+      "date": "2024-08-28",
+      "count": 2
+    },
+    {
+      "date": "2024-08-29",
+      "count": 1
+    },
+    {
+      "date": "2024-08-30",
+      "count": 1
+    },
+    {
+      "date": "2024-09-01",
+      "count": 3
+    },
+    {
+      "date": "2024-09-02",
+      "count": 1
+    },
+    {
+      "date": "2024-09-03",
+      "count": 1
+    },
+    {
+      "date": "2024-09-04",
+      "count": 1
+    },
+    {
+      "date": "2024-09-06",
+      "count": 1
+    },
+    {
+      "date": "2024-09-09",
+      "count": 1
+    },
+    {
+      "date": "2024-09-11",
+      "count": 1
+    },
+    {
+      "date": "2024-09-16",
+      "count": 2
+    },
+    {
+      "date": "2024-09-19",
+      "count": 1
+    },
+    {
+      "date": "2024-10-02",
+      "count": 1
+    },
+    {
+      "date": "2024-10-04",
+      "count": 1
+    },
+    {
+      "date": "2024-10-05",
+      "count": 1
+    },
+    {
+      "date": "2024-10-08",
+      "count": 1
+    },
+    {
+      "date": "2024-10-10",
+      "count": 1
+    },
+    {
+      "date": "2024-10-12",
+      "count": 1
+    },
+    {
+      "date": "2024-10-13",
+      "count": 1
+    },
+    {
+      "date": "2024-10-14",
+      "count": 1
+    },
+    {
+      "date": "2024-10-17",
+      "count": 1
+    },
+    {
+      "date": "2024-10-19",
+      "count": 1
+    },
+    {
+      "date": "2025-01-15",
+      "count": 19
+    },
+    {
+      "date": "2025-06-07",
+      "count": 10
+    },
+    {
+      "date": "2025-06-09",
+      "count": 8
+    },
+    {
+      "date": "2025-06-10",
+      "count": 5
+    },
+    {
+      "date": "2025-06-11",
+      "count": 1
+    },
+    {
+      "date": "2025-06-12",
+      "count": 3
+    },
+    {
+      "date": "2025-06-14",
+      "count": 14
+    },
+    {
+      "date": "2025-06-15",
+      "count": 54
+    },
+    {
+      "date": "2025-06-16",
+      "count": 1
+    },
+    {
+      "date": "2025-07-09",
+      "count": 7
+    },
+    {
+      "date": "2025-07-10",
+      "count": 3
+    },
+    {
+      "date": "2025-07-11",
+      "count": 2
+    },
+    {
+      "date": "2025-07-14",
+      "count": 1
+    },
+    {
+      "date": "2025-08-01",
+      "count": 1
+    },
+    {
+      "date": "July 9, 2025",
+      "count": 2
+    },
+    {
+      "date": "July 11, 2025",
+      "count": 1
+    },
+    {
+      "date": "July 12, 2025",
+      "count": 2
+    },
+    {
+      "date": "July 29, 2025",
+      "count": 1
+    },
+    {
+      "date": "August 1, 2025",
+      "count": 2
+    },
+    {
+      "date": "2025-06-17",
+      "count": 7
+    },
+    {
+      "date": "2025-8-1",
+      "count": 1
+    },
+    {
+      "date": "2024-6-14",
+      "count": 20
+    },
+    {
+      "date": "2024-6-15",
+      "count": 71
+    }
+  ],
+  "contestRatings": [
+    {
+      "platform": "leetcode",
+      "rating": 1414,
+      "maxRating": 1414
+    },
+    {
+      "platform": "codeforces",
+      "rating": 650,
+      "maxRating": 650
+    }
+  ],
+  "awards": [
+    {
+      "platform": "leetcode",
+      "badges": [],
+      "achievements": []
+    },
+    {
+      "platform": "codechef",
+      "badges": [],
+      "achievements": []
+    }
+  ],
+  "dsaTopics": {
+    "Arrays": 30,
+    "Strings": 18,
+    "Dynamic Programming": 14,
+    "Trees": 12,
+    "Graphs": 9,
+    "Linked Lists": 9,
+    "Sorting": 8,
+    "Binary Search": 7,
+    "Hash Tables": 6,
+    "Others": 4
+  }
+}

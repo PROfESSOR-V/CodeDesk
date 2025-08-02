@@ -1,5 +1,8 @@
 import asyncHandler from "express-async-handler";
 import { supabaseAdmin } from "../utils/supabaseClient.js";
+import fs from 'fs';
+import path from 'path';
+import { aggregatePortfolio } from "../utils/aggregatePortfolio.js";
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -88,29 +91,41 @@ export const updateUserSections = asyncHandler(async (req, res) => {
 // @route  DELETE /api/users/platform
 // @access Private
 export const removePlatform = asyncHandler(async (req, res) => {
-  const { platformName } = req.body;
-  
-  // Get current platforms
-  const { data, error: fetchError } = await supabaseAdmin
-    .from("profiles")
-    .select("platforms")
-    .eq("supabase_id", req.user.id)
+  const { platformId } = req.body; // e.g. 'leetcode', 'codechef'
+  if (!platformId) {
+    res.status(400);
+    throw new Error('platformId is required');
+  }
+
+  // 1. Pull existing array
+  const { data: prof, error: fetchErr } = await supabaseAdmin
+    .from('profiles')
+    .select('platforms')
+    .eq('supabase_id', req.user.id)
     .single();
+  if (fetchErr) throw new Error(fetchErr.message);
 
-  if (fetchError) throw new Error(fetchError.message);
-  
-  // Filter out the platform to remove
-  const updatedPlatforms = (data?.platforms || []).filter(p => p.name !== platformName);
-  
-  // Update platforms array
-  const { error: updateError } = await supabaseAdmin
-    .from("profiles")
-    .update({ platforms: updatedPlatforms })
-    .eq("supabase_id", req.user.id);
+  const updated = (prof?.platforms || []).filter((p) => p.id !== platformId);
 
-  if (updateError) throw new Error(updateError.message);
+  // 2. Save back to profiles
+  const { error: updErr } = await supabaseAdmin
+    .from('profiles')
+    .update({ platforms: updated })
+    .eq('supabase_id', req.user.id);
+  if (updErr) throw new Error(updErr.message);
 
-  res.json({ message: "Platform removed successfully", platforms: updatedPlatforms });
+  // 3. Remove row from per-platform *_stats table
+  const { PLATFORM_TABLES } = await import('../utils/platformTables.js');
+  const table = PLATFORM_TABLES[platformId];
+  if (table) {
+    await supabaseAdmin.from(table).delete().eq('supabase_id', req.user.id);
+  }
+
+  // 4. Recompute total_stats
+  const { recomputeTotalStats } = await import('../utils/totalStats.js');
+  await recomputeTotalStats(req.user.id);
+
+  res.json({ message: 'Platform removed', platforms: updated });
 }); 
 
 // Get user portfolio data (aggregated stats from all verified platforms)
@@ -144,7 +159,7 @@ export const getPortfolioData = async (req, res) => {
       verifiedPlatforms.map(async (plat) => {
         const lastFetch = new Date(plat.stats?.fetchedAt || 0);
         const ageHours = (Date.now() - lastFetch.getTime()) / 36e5;
-        if (!plat.stats || ageHours > 24) {
+        if (!plat.stats || ageHours > 24 || (plat.stats?.totalSolved || 0) === 0) {
           try {
             const freshStats = await (await import('../utils/platformStats.js')).getPlatformStats(plat.id, plat.url);
             freshStats.fetchedAt = new Date().toISOString();
@@ -164,24 +179,59 @@ export const getPortfolioData = async (req, res) => {
       })
     );
 
-    // Aggregate statistics across all platforms
-    let totalQuestions = 0;
-    let totalActiveDays = 0;
-    let totalRating = 0;
-    let easyProblems = 0;
-    let mediumProblems = 0;
-    let hardProblems = 0;
-    let totalContests = 0;
-    let platformStats = [];
-    let contributionData = {};
-    let contestRatings = [];
-    let awards = [];
-    let dsaTopics = {};
-    let unifiedActivityMap = {};
+    // Fetch pre-aggregated total_stats row
+    // read total_stats
+    const { data: totalRow } = await supabaseAdmin
+      .from('total_stats')
+      .select('*')
+      .eq('supabase_id', userId)
+      .single();
 
-    refreshedPlatforms.forEach(platform => {
-      const stats = platform.stats || {};
+    if (totalRow) {
+      const portfolioData = {
+        user: {
+          id: profile?.supabase_id || userId,
+          username: profile?.username || 'User',
+          email: user.user.email,
+          fullName: profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'N/A',
+          profilePicture: profile?.avatar_url,
+          country: profile?.country,
+        },
+        aggregatedStats: {
+          totalQuestions: totalRow.total_questions,
+          easy: totalRow.easy_solved,
+          medium: totalRow.medium_solved,
+          hard: totalRow.hard_solved,
+          rating: totalRow.rating, // array of per-platform ratings
+          totalContests: totalRow.total_contests,
+        },
+        unifiedActivity: totalRow.heatmap,
+        todayCount: totalRow.today_count,
+      };
+      return res.json(portfolioData);
+    }
+
+    const userMeta = {
+      id: profile?.supabase_id || userId,
+      username: profile?.username || 'User',
+      email: user.user.email,
+      fullName:
+        profile?.full_name ||
+        `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
+        'N/A',
+      profilePicture: profile?.avatar_url,
+      country: profile?.country,
+      college: profile?.college,
+      linkedinUrl: profile?.linkedin_url,
+      twitterUrl: profile?.twitter_url,
+      createdAt: profile?.created_at,
+    };
+
+    const portfolioData = aggregatePortfolio(refreshedPlatforms, userMeta);
+    // All additional aggregations are now handled inside aggregatePortfolio util.
+      /* Legacy aggregation code removed to use aggregatePortfolio util */
       
+/*
       // Aggregate basic stats with priority (avoid double-counting the same platform twice)
       const solved =
         stats.totalSolved ??
@@ -280,6 +330,8 @@ export const getPortfolioData = async (req, res) => {
     }
 
     const portfolioData = {
+      // aggregated portfolio data for user
+ 
       user: {
         id: profile?.supabase_id || userId,
         username: profile?.username || 'User',
@@ -311,6 +363,26 @@ export const getPortfolioData = async (req, res) => {
       dsaTopics
     };
 
+    // Persist portfolio data to a JSON file for quick access / caching
+    try {
+      const dataDir = path.join(process.cwd(), 'backend', 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      const filePath = path.join(dataDir, `${portfolioData.user.username || userId}_portfolio.json`);
+      fs.writeFileSync(filePath, JSON.stringify(portfolioData, null, 2), 'utf-8');
+    } catch (persistErr) {
+      console.error('Failed to write portfolio data file:', persistErr.message);
+    }
+
+    */
+    // Persist aggregated stats back to Supabase profile
+    await supabaseAdmin
+      .from('profiles')
+      .update({ portfolio: portfolioData.aggregatedStats })
+      .eq('supabase_id', userId);
+
+    // Return aggregated portfolio
     res.json(portfolioData);
   } catch (error) {
     console.error('Portfolio data error:', error);

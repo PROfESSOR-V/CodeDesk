@@ -750,7 +750,7 @@ function Platforms({ profile, tokenState }) {
     }
   };
 
-  const removePlatform = async (platformName) => {
+  const removePlatform = async (platformId) => {
     try {
       const accessToken = tokenState;
       if (!accessToken) {
@@ -765,7 +765,7 @@ function Platforms({ profile, tokenState }) {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          platformName
+          platformId
         }),
       });
 

@@ -788,19 +788,29 @@ async function hackerRankStats(profileUrl) {
   }
 }
 
+import { scrapeProfile } from './scrapeProfile.js';
+
 export async function getPlatformStats(platformId, profileUrl) {
+  // Preferred: try external scraper implementation first
+  try {
+    return await scrapeProfile(platformId, profileUrl);
+  } catch (scrapeErr) {
+    console.log(`[platformStats] Falling back for ${platformId}:`, scrapeErr.message);
+  }
+
+  // Legacy in-file implementations
   switch (platformId) {
-    case "leetcode":
+    case 'leetcode':
       return await leetCodeStats(profileUrl);
-    case "codeforces":
+    case 'codeforces':
       return await codeforcesStats(profileUrl);
-    case "gfg":
+    case 'gfg':
       return await gfgStats(profileUrl);
-    case "codechef":
+    case 'codechef':
       return await codechefStats(profileUrl);
-    case "hackerrank":
+    case 'hackerrank':
       return await hackerRankStats(profileUrl);
     default:
-      throw new Error("Unsupported platform");
+      throw new Error('Unsupported platform');
   }
 } 
