@@ -1,11 +1,15 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
+
 
 async function scrapeGFG(username) {
   const url = `https://www.geeksforgeeks.org/user/${username}`;
   const browser = await puppeteer.launch({
-    headless: "new", // Headless, no UI
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+    args: chromium.args,
   });
+  
   
 
   const page = await browser.newPage();
