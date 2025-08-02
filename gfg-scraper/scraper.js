@@ -25,7 +25,11 @@ async function scrapeGFG(username) {
     }
   });
 
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+  await page.goto(url, {
+    waitUntil: 'domcontentloaded',
+    timeout: 0, // disables timeout
+  });
+  
   await page.waitForSelector('rect[style*="fill"]', { visible: true });
 
   const { heatmapData, currentDayHeatmapData } = await page.evaluate(async () => {

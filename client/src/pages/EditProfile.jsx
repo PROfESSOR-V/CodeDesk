@@ -828,6 +828,40 @@ function Platforms({ profile, tokenState }) {
         
         // Show success message
         alert(`${platform.label} profile verified successfully!`);
+
+        // Trigger external scraper service for GFG after verification
+        if (verifyTarget === "gfg") {
+          try {
+            // Extract GFG username from URL (last segment after /user/ or trailing slash)
+            const parts = platform.url.split("/").filter(Boolean);
+            const gfgUsername = parts[parts.length - 1];
+
+            // Get Supabase user id to pass to scraper
+            const { data: { user: supaUser } } = await supabase.auth.getUser();
+            if (!supaUser?.id) {
+              console.error("Supabase user not found, cannot trigger GFG scraper");
+            } else {
+              // Delay trigger by 5 seconds to ensure profile stats are reflected
+              setTimeout(async () => {
+                try {
+                  await fetch("https://gfg-scraper-jns7.onrender.com/scrape", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      username: gfgUsername,
+                      supabase_id: supaUser.id,
+                    }),
+                  });
+                  console.log("✅ Triggered GFG scraper for", gfgUsername);
+                } catch (fetchErr) {
+                  console.error("Trigger request failed:", fetchErr);
+                }
+              }, 5000);
+            }
+          } catch (scrapeErr) {
+            console.error("Error triggering GFG scraper:", scrapeErr);
+          }
+        }
         setModalOpen(false);
       } else {
         throw new Error(`Verification failed. Please ensure:\n\n1. You've updated your ${platform.label} profile name to: ${token}\n2. The changes are saved and public\n3. The profile URL is correct`);
