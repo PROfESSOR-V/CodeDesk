@@ -79,15 +79,32 @@ async function scrapeGFG(username) {
     const blocks = [...document.querySelectorAll('div[class*="scoreCard_head_left--score"]')];
     const totalQuestions = parseInt(blocks[1]?.innerText.split('\n')[0]) || 0;
 
+    // Try multiple patterns to extract difficulty counts
     const difficultyData = { Easy: 0, Medium: 0, Hard: 0 };
-    const difficultyElements = Array.from(document.querySelectorAll('.problemNavbar_head_nav__a4K6P .problemNavbar_head_nav--text__UaGCx'));
 
-    difficultyElements.forEach(el => {
-      const text = el.innerText.trim();
-      if (text.includes('EASY')) difficultyData.Easy = parseInt(text.match(/\((\d+)\)/)?.[1] || 0);
-      if (text.includes('MEDIUM')) difficultyData.Medium = parseInt(text.match(/\((\d+)\)/)?.[1] || 0);
-      if (text.includes('HARD')) difficultyData.Hard = parseInt(text.match(/\((\d+)\)/)?.[1] || 0);
+    // 1. Original navbar elements
+    const navEls = Array.from(document.querySelectorAll('.problemNavbar_head_nav__a4K6P .problemNavbar_head_nav--text__UaGCx'));
+    navEls.forEach(el => {
+      const t = el.innerText.trim().toUpperCase();
+      if (t.startsWith('EASY')) difficultyData.Easy = parseInt(t.match(/\((\d+)\)/)?.[1] || 0);
+      if (t.startsWith('MEDIUM')) difficultyData.Medium = parseInt(t.match(/\((\d+)\)/)?.[1] || 0);
+      if (t.startsWith('HARD')) difficultyData.Hard = parseInt(t.match(/\((\d+)\)/)?.[1] || 0);
     });
+
+    // 2. Score-card sections (fallback)
+    if (!difficultyData.Easy && !difficultyData.Medium && !difficultyData.Hard) {
+      const scoreTexts = Array.from(document.querySelectorAll('div')).map(el => el.innerText.trim());
+      scoreTexts.forEach(t => {
+        const m = t.match(/^(Easy|Medium|Hard)\s*\((\d+)\)/i);
+        if (m) {
+          const key = m[1];
+          difficultyData[key] = parseInt(m[2]);
+        }
+      });
+    }
+
+    // Ensure numbers
+    ['Easy','Medium','Hard'].forEach(k=>{ if(isNaN(difficultyData[k])) difficultyData[k]=0; });
 
     return {
       profileName,
