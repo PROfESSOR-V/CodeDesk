@@ -32,6 +32,12 @@ async function scrapeGFG(username) {
   
   await page.waitForSelector('rect[style*="fill"]', { visible: true });
 
+  // Wait for difficulty stats to load (up to 15 s). They’re rendered via JS after initial page paint.
+  await page.waitForFunction(() => {
+    const els = document.querySelectorAll('.problemNavbar_head_nav__a4K6P .problemNavbar_head_nav--text__UaGCx');
+    return els && els.length >= 3;
+  }, { timeout: 15000 }).catch(() => {});
+
   const { heatmapData, currentDayHeatmapData } = await page.evaluate(async () => {
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     const cells = Array.from(document.querySelectorAll('rect[style*="fill"]'));

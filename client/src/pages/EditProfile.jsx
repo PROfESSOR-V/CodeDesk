@@ -833,8 +833,18 @@ function Platforms({ profile, tokenState }) {
         if (verifyTarget === "gfg") {
           try {
             // Extract GFG username from URL (last segment after /user/ or trailing slash)
-            const parts = platform.url.split("/").filter(Boolean);
-            const gfgUsername = parts[parts.length - 1];
+            // Clean username from URL (remove any query/hash)
+            let gfgUsername;
+            try {
+              const parsed = new URL(platform.url.startsWith("http") ? platform.url : `https://auth.geeksforgeeks.org/user/${platform.url}`);
+              const segments = parsed.pathname.split("/").filter(Boolean);
+              gfgUsername = segments[segments.length - 1] || "";
+            } catch {
+              // Fallback: last segment of the string before ? or #
+              const parts = platform.url.split("/").filter(Boolean);
+              gfgUsername = parts[parts.length - 1] || "";
+            }
+            gfgUsername = gfgUsername.split("?")[0].split("#")[0];
 
             // Get Supabase user id to pass to scraper
             const { data: { user: supaUser } } = await supabase.auth.getUser();
