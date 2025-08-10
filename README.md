@@ -9,7 +9,7 @@ This monorepo contains two workspaces:
 
 | Directory | Description |
 |-----------|-------------|
-| `backend/` | Node.js + Express + MongoDB REST API boilerplate |
+| `backend/` | Node.js + Express + SUPABASE REST API boilerplate |
 | `client/`  | React + Vite + Tailwind CSS frontend skeleton |
 
 ## Prerequisites
