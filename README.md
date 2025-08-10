@@ -9,13 +9,13 @@ This monorepo contains two workspaces:
 
 | Directory | Description |
 |-----------|-------------|
-| `backend/` | Node.js + Express + MongoDB REST API boilerplate |
+| `backend/` | Node.js + Express + SUPABASE REST API boilerplate |
 | `client/`  | React + Vite + Tailwind CSS frontend skeleton |
 
 ## Prerequisites
 
 - Node.js ≥ 18
-- MongoDB instance (local or Atlas)
+- SUPABASE account with project name CodeDesk 
 
 ---
 ## Getting Started (Backend)
