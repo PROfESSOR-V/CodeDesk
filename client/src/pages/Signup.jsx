@@ -111,7 +111,7 @@ export default function Signup() {
       <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
         <div ref={formRef} className="w-full max-w-md space-y-6">
           <h2 className="text-3xl font-bold mb-2">
-            Create your <BrandName variant="white" /> account
+            Create your <BrandName /> account
           </h2>
           <div className="space-y-4">
             <div>

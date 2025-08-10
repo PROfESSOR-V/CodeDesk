@@ -85,7 +85,7 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
         <div ref={formRef} className="w-full max-w-md space-y-6">
           <h2 className="text-3xl font-bold">
-            Sign in to <BrandName variant="white" />
+            Sign in to <BrandName />
           </h2>
           <div className="space-y-4">
             <div>
