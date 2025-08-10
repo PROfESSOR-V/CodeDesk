@@ -27,6 +27,7 @@ This monorepo contains two workspaces:
    - optional for local: `PORT=5000`
 3. `npm install`
 4. `npm run dev` – starts API on <http://localhost:5000>
+5. Must run these below SQL commands to proper run this project. Good Luck !!
 
 ### Supabase setup (SQL to run in Supabase SQL Editor)
 
