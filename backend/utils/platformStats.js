@@ -788,15 +788,10 @@ async function hackerRankStats(profileUrl) {
   }
 }
 
-import { scrapeProfile } from './scrapeProfile.js';
+// External dynamic scrapers removed
 
 export async function getPlatformStats(platformId, profileUrl) {
-  // Preferred: try external scraper implementation first
-  try {
-    return await scrapeProfile(platformId, profileUrl);
-  } catch (scrapeErr) {
-    console.log(`[platformStats] Falling back for ${platformId}:`, scrapeErr.message);
-  }
+  // External dynamic scrapers removed; use built-in implementations below
 
   // Legacy in-file implementations
   switch (platformId) {

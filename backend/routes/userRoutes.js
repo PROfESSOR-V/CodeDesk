@@ -3,8 +3,7 @@ import {
   syncSupabaseUser, 
   updateUserProfile,
   updateUserSections,
-  removePlatform,
-  getPortfolioData
+  removePlatform
 } from '../controllers/userController.js';
 
 import express from "express";
@@ -18,6 +17,6 @@ router.put("/sections", protect, updateUserSections);
 router.delete("/platform", protect, removePlatform);
 
 // Portfolio route
-router.get('/portfolio', protect, getPortfolioData);
+// portfolio endpoint removed
 
 export default router; 

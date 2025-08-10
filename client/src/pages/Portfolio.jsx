@@ -14,14 +14,71 @@ const platformIcons = {
   hackerrank: '/src/assests/hackerrank-logo.jpeg'
 };
 
+const EMPTY_PORTFOLIO = {
+  user: {},
+  verifiedPlatforms: [],
+  aggregatedStats: {
+    totalQuestions: 0,
+    totalActiveDays: 0,
+    totalRating: 0,
+    totalContests: 0,
+    problemDifficulty: { easy: 0, medium: 0, hard: 0 },
+  },
+  unifiedActivity: [],
+  contestRatings: [],
+  awards: [],
+  dsaTopics: {},
+  contributionData: {},
+};
+
 const Portfolio = () => {
   const [portfolioData, setPortfolioData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showGetCardModal, setShowGetCardModal] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [authEmail, setAuthEmail] = useState("");
+
+  // Trigger GFG scraper on each page load/refresh if user has verified GFG profile
+  useEffect(() => {
+    (async () => {
+      if (!portfolioData) return;
+      const gfgPlat = (portfolioData.verifiedPlatforms || []).find(p => p.id === 'gfg' && p.verified);
+      if (!gfgPlat) return;
+
+      // Derive clean username from URL
+      let username;
+      try {
+        const url = new URL(gfgPlat.url.startsWith('http') ? gfgPlat.url : `https://auth.geeksforgeeks.org/user/${gfgPlat.url}`);
+        const segs = url.pathname.split('/').filter(Boolean);
+        username = segs[segs.length - 1].split('?')[0].split('#')[0];
+      } catch {
+        const parts = gfgPlat.url.split('/').filter(Boolean);
+        username = parts[parts.length - 1].split('?')[0].split('#')[0];
+      }
+      if (!username) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
+
+      try {
+        await fetch('https://gfg-scraper-jns7.onrender.com/scrape', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, supabase_id: user.id }),
+        });
+        // Optionally re-fetch portfolio after scrape completes (delay 3s)
+        setTimeout(fetchPortfolioData, 3000);
+      } catch (err) {
+        console.error('GFG auto-trigger failed:', err);
+      }
+    })();
+  }, [portfolioData]);
 
   useEffect(() => {
+    // Load portfolio (may be empty) and user profile in parallel
     fetchPortfolioData();
+    fetchUserProfile();
   }, []);
 
   const fetchPortfolioData = async () => {
@@ -29,8 +86,10 @@ const Portfolio = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No session found');
+        setPortfolioData(EMPTY_PORTFOLIO);
         return;
       }
+      setAuthEmail(session.user?.email || "");
 
       console.log('Fetching portfolio data...');
       const response = await fetch('http://localhost:5000/api/users/portfolio', {
@@ -62,15 +121,45 @@ const Portfolio = () => {
             },
           };
         }
-        setPortfolioData(data);
+        setPortfolioData(data || EMPTY_PORTFOLIO);
       } else {
-        const errorData = await response.text();
-        console.error('Portfolio fetch error:', response.status, errorData);
+        try {
+          const errorData = await response.text();
+          console.error('Portfolio fetch error:', response.status, errorData);
+        } catch {}
+        setPortfolioData(EMPTY_PORTFOLIO);
       }
     } catch (error) {
       console.error('Error fetching portfolio data:', error);
+      setPortfolioData(EMPTY_PORTFOLIO);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setProfile(null);
+        return;
+      }
+      setAuthEmail((prev) => prev || session.user?.email || "");
+      const resp = await fetch('http://localhost:5000/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setProfile(data || null);
+      } else {
+        setProfile(null);
+      }
+    } catch (err) {
+      console.error('Profile fetch failed', err);
+      setProfile(null);
     }
   };
 
@@ -130,19 +219,19 @@ const Portfolio = () => {
     );
   }
 
-  // Portfolio with verified platforms
-  if (!portfolioData) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p>Loading portfolio data...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  // Always render the page; fall back to EMPTY_PORTFOLIO if data missing
+  const safeData = portfolioData || EMPTY_PORTFOLIO;
+  const verifiedFromProfile = (profile?.platforms || []).filter(p => p.verified).map(p => ({ platform: p.id }));
+  const userForCard = {
+    username: profile?.username || "",
+    fullName: profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim(),
+    email: authEmail,
+    profilePicture: profile?.avatar_url,
+    country: profile?.country,
+    college: profile?.college,
+    linkedinUrl: profile?.linkedin_url,
+    twitterUrl: profile?.twitter_url,
+  };
 
   return (
     <DashboardLayout>
@@ -153,8 +242,8 @@ const Portfolio = () => {
             {/* Left Profile Card */}
             <div className="lg:col-span-1">
               <ProfileCard 
-                user={portfolioData.user || {}}
-                verifiedPlatforms={portfolioData.verifiedPlatforms || []}
+                user={userForCard}
+                verifiedPlatforms={verifiedFromProfile}
                 onGetCard={() => setShowGetCardModal(true)}
               />
             </div>
@@ -164,35 +253,35 @@ const Portfolio = () => {
               
               {/* Top Stats Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TotalQuestionsCard stats={portfolioData.aggregatedStats || {}} />
-                <ActiveDaysCard stats={portfolioData.aggregatedStats || {}} />
+                <TotalQuestionsCard stats={safeData.aggregatedStats || {}} />
+                <ActiveDaysCard stats={safeData.aggregatedStats || {}} />
               </div>
 
               {/* Contribution Heatmap */}
               <ContributionHeatmap 
-                activity={portfolioData.unifiedActivity || []}
+                activity={safeData.unifiedActivity || []}
               />
 
               {/* Contest Card */}
-              <ContestCard 
-                contestData={portfolioData.contestRatings || []}
-                totalContests={portfolioData.aggregatedStats?.totalContests || 0}
+                <ContestCard 
+                  contestData={safeData.contestRatings || []}
+                  totalContests={safeData.aggregatedStats?.totalContests || 0}
               />
 
               {/* Rating and Problem Summary */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <RatingCard stats={portfolioData.aggregatedStats || {}} />
-                <ProblemSummaryCard stats={portfolioData.aggregatedStats || {}} />
+                <RatingCard stats={safeData.aggregatedStats || {}} />
+                <ProblemSummaryCard stats={safeData.aggregatedStats || {}} />
               </div>
 
               {/* Contest Rating */}
-              <ContestRatingCard contestRatings={portfolioData.contestRatings || []} />
+              <ContestRatingCard contestRatings={safeData.contestRatings || []} />
 
               {/* Awards */}
-              <AwardsCard awards={portfolioData.awards || []} />
+              <AwardsCard awards={safeData.awards || []} />
 
               {/* DSA Analysis */}
-              <DSAAnalysisCard dsaTopics={portfolioData.dsaTopics || {}} />
+              <DSAAnalysisCard dsaTopics={safeData.dsaTopics || {}} />
             </div>
           </div>
         </div>

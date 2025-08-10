@@ -40,7 +40,7 @@ export async function upsertPlatformStats(platformId, supabaseId, stats) {
   if (!table)
     throw new Error(`No table mapping for platform ${platformId}`);
 
-  const payload = {
+  const basePayload = {
     supabase_id: supabaseId,
     profile_name: stats.username || stats.displayName || null,
     total_questions:
@@ -55,18 +55,46 @@ export async function upsertPlatformStats(platformId, supabaseId, stats) {
       stats.score ??
       0,
     total_contests: stats.contestsParticipated ?? 0,
-    badges: stats.badges ? JSON.stringify(stats.badges) : null,
-    heatmap: stats.contributionData
-      ? JSON.stringify(stats.contributionData)
-      : null,
+    badges: stats.badges ?? null,
+    heatmap: stats.contributionData ?? null,
     today_count: getTodayHeatmapCount(stats.contributionData),
-    raw_stats: stats ? JSON.stringify(stats) : null,
+    raw_stats: stats ?? null,
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabaseAdmin
-    .from(table)
-    .upsert(payload, { onConflict: "supabase_id" });
+  // Prefer to also send a username column if the table has it. Try with it first,
+  // and if the column does not exist, retry without it.
+  const payloadWithUsername = {
+    ...basePayload,
+    username: stats.username || stats.displayName || null,
+  };
+
+  let error;
+  let triedFallback = false;
+  for (const payload of [payloadWithUsername, basePayload]) {
+    const res = await supabaseAdmin
+      .from(table)
+      .upsert(payload, { onConflict: "supabase_id" });
+    error = res.error;
+    if (!error) break;
+    // If username column missing, retry without it (only once)
+    if (
+      !triedFallback &&
+      /column\s+"?username"?\s+does\s+not\s+exist/i.test(error.message)
+    ) {
+      triedFallback = true;
+      continue;
+    }
+    // Some Supabase internal queries may reference p.username; attempt fallback once
+    if (
+      !triedFallback &&
+      /p\.username\s+does\s+not\s+exist/i.test(error.message)
+    ) {
+      triedFallback = true;
+      continue;
+    }
+    break;
+  }
 
   if (error) {
     console.error(`[upsertPlatformStats] ${platformId} upload failed`, error);

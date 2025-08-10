@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 import { protect } from "../middleware/authMiddleware.js";
 import { supabaseAdmin } from "../utils/supabaseClient.js";
 import { getPlatformStats } from "../utils/platformStats.js";
-import { aggregatePortfolio } from "../utils/aggregatePortfolio.js";
 import { upsertPlatformStats } from "../utils/platformTables.js";
 
 dotenv.config();
@@ -133,14 +132,19 @@ router.post("/confirm", protect, async (req, res) => {
     };
 
     // Determine if verification code can be found
-    const normalize = (s) => (s || "")
-      .split(/\s+/)[0]                 // take first word
-      .replace(/[^A-Z0-9]/gi, "")     // keep only alphanumerics
-      .toUpperCase();
+    const normalize = (s) => (s || "").replace(/[^A-Z0-9]/gi, "").toUpperCase();
     let found = false;
     if (stats && stats.displayName) {
       console.log("🔍 Stats.displayName:", stats.displayName, "Expected:", verificationCode);
-      found = normalize(stats.displayName) === normalize(verificationCode);
+      const codeStrip = normalize(verificationCode);
+      let displaySource = stats.displayName;
+      // Special handling for GFG: many users append institute text; use the first token (or before hyphen)
+      if (platformId === 'gfg') {
+        const firstToken = (stats.displayName || '').split(/[-\s]/).filter(Boolean)[0] || '';
+        if (firstToken) displaySource = firstToken;
+      }
+      const displayStrip = normalize(displaySource);
+      found = displayStrip === codeStrip || normalize(stats.displayName).includes(codeStrip);
     }
     
     // Special handling for GFG - check full page HTML if available
@@ -169,7 +173,11 @@ router.post("/confirm", protect, async (req, res) => {
           const bustUrl = profileUrl + (profileUrl.includes("?") ? "&" : "?") + "ts=" + Date.now();
           const retryStats = await getPlatformStats(platformId, bustUrl);
           console.log("🔄 Retry fetched displayName:", retryStats.displayName);
-          found = normalize(retryStats.displayName) === normalize(verificationCode);
+          const codeStrip = normalize(verificationCode);
+          let displaySource = retryStats.displayName || '';
+          const firstToken = displaySource.split(/[-\s]/).filter(Boolean)[0] || '';
+          if (firstToken) displaySource = firstToken;
+          found = normalize(displaySource) === codeStrip || normalize(retryStats.displayName || '').includes(codeStrip);
           if (found) stats = retryStats; // keep final stats for storage
         } catch (err) {
           console.error("Retry scrape error", err.message);
@@ -220,24 +228,22 @@ router.post("/confirm", protect, async (req, res) => {
         console.error("Supabase upsert error", upsertErr);
         return res.status(500).json({ message: "Database error" });
       }
-      // Recalculate aggregated portfolio stats after successful verification
+      // Portfolio aggregation removed for now
       const { data: updatedProfile } = await supabaseAdmin
         .from("profiles")
         .select("platforms")
         .eq("supabase_id", req.user.id)
         .single();
 
-      // Store detailed stats into dedicated *_stats table
-      await upsertPlatformStats(platformId, req.user.id, statsObj);
+      // Store detailed stats into dedicated *_stats table (non-fatal on failure)
+      try {
+        await upsertPlatformStats(platformId, req.user.id, statsObj);
+      } catch (e) {
+        console.error(`[verification/confirm] upsertPlatformStats failed for ${platformId}:`, e.message);
+        // proceed without blocking verification
+      }
 
-      const portfolioData = aggregatePortfolio(updatedProfile?.platforms || [], { id: req.user.id });
-
-      await supabaseAdmin
-        .from("profiles")
-        .update({ portfolio: portfolioData.aggregatedStats })
-        .eq("supabase_id", req.user.id);
-
-      return res.json({ verified: true, stats: statsObj, aggregated: portfolioData.aggregatedStats });
+      return res.json({ verified: true, stats: statsObj });
     } else {
       // Remove the temp entry to allow user to try again
       const updated = existing.filter((p) => p.id !== platformId);
