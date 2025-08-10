@@ -15,7 +15,7 @@ This monorepo contains two workspaces:
 ## Prerequisites
 
 - Node.js ≥ 18
-- MongoDB instance (local or Atlas)
+- SUPABASE account with project name CodeDesk 
 
 ---
 ## Getting Started (Backend)
