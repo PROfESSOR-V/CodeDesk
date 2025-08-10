@@ -7,11 +7,13 @@ import gfgLogo from "../assests/gfg-logo.png";
 import ccLogo from "../assests/codechef-logo.jpeg";
 import hrLogo from "../assests/hackerrank-logo.jpeg";
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import anime from "animejs";
 
 export default function Landing() {
   const heroRef = useRef(null);
   const platformRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (heroRef.current) {
@@ -58,7 +60,7 @@ export default function Landing() {
             <BrandName /> helps you navigate and track your coding journey to success. Connect
             all your favourite coding platforms and see everything in one place.
           </p>
-          <button className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
+          <button onClick={() => navigate('/signup')} className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
             Try Question Tracker →
           </button>
         </div>
@@ -86,7 +88,7 @@ export default function Landing() {
           </p>
           <div ref={platformRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
             {platformLogos.map(({ src, alt }) => (
-              <img
+              <img onClick={() => navigate('/signup')}
                 key={alt}
                 src={src}
                 alt={alt}
@@ -116,7 +118,7 @@ export default function Landing() {
       <section className="py-20 px-6 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10">
         {/* Illustration */}
         <div className="flex-1 order-2 lg:order-1">
-          <img
+          <img onClick={() => navigate('/signup')}
             src="https://via.placeholder.com/500x350?text=Question+Tracker"
             alt="Question tracker screenshot"
             className="rounded-lg shadow-lg border"
@@ -128,7 +130,7 @@ export default function Landing() {
           <p className="text-gray-600 mb-6">
             Say goodbye to last-minute stress. Track all your questions and notes in one place for easy review and revision.
           </p>
-          <button className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
+          <button onClick={() => navigate('/signup')} className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
             Try Question Tracker →
           </button>
         </div>
@@ -147,11 +149,11 @@ export default function Landing() {
               <li>Monitor your ratings in contests over time</li>
               <li>Showcase your achievements</li>
             </ul>
-            <button className="mt-8 bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
+            <button onClick={() => navigate('/signup')} className="mt-8 bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
               Try Profile Tracker →
             </button>
           </div>
-          <img
+          <img onClick={() => navigate('/signup')}
             src="https://via.placeholder.com/500x400?text=Portfolio+Analytics"
             alt="Portfolio analytics"
             className="rounded-lg shadow-lg border"
@@ -162,7 +164,7 @@ export default function Landing() {
       {/* GitHub Tracker Section */}
       <section className="py-20 px-6 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10">
         <div className="flex-1">
-          <img
+          <img onClick={() => navigate('/signup')}
             src="https://via.placeholder.com/500x350?text=GitHub+Tracker"
             alt="GitHub tracker screenshot"
             className="rounded-lg shadow-lg border"
@@ -173,7 +175,7 @@ export default function Landing() {
           <p className="text-gray-600 mb-6">
             Unlock the story behind your GitHub contributions – insights, stats and more, all in one place!
           </p>
-          <button className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
+          <button onClick={() => navigate('/signup')} className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
             Try GitHub Tracker →
           </button>
         </div>
@@ -186,7 +188,7 @@ export default function Landing() {
           <p className="text-gray-600 mb-8 max-w-xl">
             Track coding contests and set reminders with just one click.
           </p>
-          <button className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
+          <button onClick={() => navigate('/signup')} className="bg-[#e67829] text-white px-6 py-3 rounded shadow hover:bg-[#e67829]/90">
             Try Event Tracker →
           </button>
         </div>

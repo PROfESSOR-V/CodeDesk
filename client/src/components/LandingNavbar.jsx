@@ -10,25 +10,20 @@ export default function LandingNavbar() {
       </div>
       <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
         <li>
-          <button onClick={() => navigate("/dashboard")} className="hover:text-[#e67829]">
-            Home
-          </button>
+          <button onClick={() => navigate('/signup')} className="hover:text-[#e67829]">Leaderboard</button>
         </li>
         <li>
-          <button className="hover:text-[#e67829]">Leaderboard</button>
+          <button onClick={() => navigate('/signup')} className="hover:text-[#e67829]">Question Tracker</button>
         </li>
         <li>
-          <button className="hover:text-[#e67829]">Question Tracker</button>
+          <button onClick={() => navigate('/signup')} className="hover:text-[#e67829]">Event Tracker</button>
         </li>
         <li>
-          <button className="hover:text-[#e67829]">Event Tracker</button>
-        </li>
-        <li>
-          <button className="hover:text-[#e67829]">Profile Tracker</button>
+          <button onClick={() => navigate('/signup')} className="hover:text-[#e67829]">Profile Tracker</button>
         </li>
       </ul>
       <button
-        onClick={() => navigate("/login")}
+        onClick={() => navigate('/signup')}
         className="ml-auto md:ml-0 bg-[#e67829] text-white px-4 py-2 rounded shadow hover:bg-[#e67829]/90 text-sm"
       >
         Login / Sign Up
