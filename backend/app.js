@@ -18,12 +18,35 @@ const allowedOrigins = [
   process.env.CLIENT_ORIGIN,
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://localhost:5173',
+  'https://localhost:3000',
 ].filter(Boolean);
+
+// Helper to decide if an origin is allowed (supports *.vercel.app previews)
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // non-browser or same-origin
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname;
+    if (hostname === 'localhost') return true;
+    // Allow any Vercel preview or production subdomain
+    if (hostname.endsWith('.vercel.app')) return true;
+    // Optional: allow CSV list via EXTRA_CORS_ORIGINS
+    if (process.env.EXTRA_CORS_ORIGINS) {
+      const extras = process.env.EXTRA_CORS_ORIGINS.split(',').map(s => s.trim()).filter(Boolean);
+      if (extras.includes(origin)) return true;
+    }
+  } catch (_) {
+    // ignore parse errors; fall through to deny
+  }
+  return false;
+}
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      if (isAllowedOrigin(origin)) return callback(null, true);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
