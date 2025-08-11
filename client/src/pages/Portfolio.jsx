@@ -92,7 +92,7 @@ const Portfolio = () => {
       setAuthEmail(session.user?.email || "");
 
       console.log('Fetching portfolio data...');
-      const response = await fetch('http://localhost:5000/api/users/portfolio', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/portfolio`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -145,7 +145,7 @@ const Portfolio = () => {
         return;
       }
       setAuthEmail((prev) => prev || session.user?.email || "");
-      const resp = await fetch('http://localhost:5000/api/users/profile', {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

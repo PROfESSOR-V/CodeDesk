@@ -62,27 +62,33 @@ export default function EditProfile() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           console.error('No session found');
-          navigate('/login'); // Redirect to login if no session
+          navigate('/login');
           return;
         }
 
         // Fetch the logged-in user's profile
-        const res = await fetch('http://localhost:5000/api/users/profile', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         });
 
+        if (res.status === 401) {
+          navigate('/login');
+          return;
+        }
         if (!res.ok) {
-          throw new Error(`Failed to fetch profile: ${res.status}`);
+          console.error('Failed to fetch profile:', res.status);
+          setProfile(null);
+          return;
         }
 
         const data = await res.json();
-        setProfile(data); // Set the profile data for the logged-in user
+        setProfile(data);
       } catch (error) {
         console.error('Error fetching profile:', error);
-        navigate('/login'); // Redirect to login on error
+        // Do not redirect on generic network/CORS errors; keep user on page
       }
     };
 
@@ -261,7 +267,7 @@ function AboutMe({ profile }) {
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/users/sections', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json", 
@@ -358,7 +364,7 @@ function Education({ profile }) {
               return;
             }
 
-            const res = await fetch('http://localhost:5000/api/users/sections', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -374,7 +380,7 @@ function Education({ profile }) {
             const data = await res.json();
             alert("Education saved successfully");
             // Refresh the profile data to show updated information
-            const profileRes = await fetch('http://localhost:5000/api/users/profile', {
+            const profileRes = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
                 'Content-Type': 'application/json',
@@ -437,7 +443,7 @@ function Achievements({ profile }) {
               return;
             }
 
-            const res = await fetch('http://localhost:5000/api/users/sections', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -453,7 +459,7 @@ function Achievements({ profile }) {
             const data = await res.json();
             alert("Achievements saved successfully");
             // Refresh the profile data to show updated information
-            const profileRes = await fetch('http://localhost:5000/api/users/profile', {
+            const profileRes = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
                 'Content-Type': 'application/json',
@@ -520,7 +526,7 @@ function WorkExperience({ profile }) {
               return;
             }
 
-            const res = await fetch('http://localhost:5000/api/users/sections', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -536,7 +542,7 @@ function WorkExperience({ profile }) {
             const data = await res.json();
             alert("Experience saved successfully");
             // Refresh the profile data to show updated information
-            const profileRes = await fetch('http://localhost:5000/api/users/profile', {
+            const profileRes = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
               headers: {
                 Authorization: `Bearer ${session.access_token}`,
                 'Content-Type': 'application/json',
@@ -653,7 +659,7 @@ function Platforms({ profile, tokenState }) {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/verification/init", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/verification/init`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -703,7 +709,7 @@ function Platforms({ profile, tokenState }) {
       });
 
       // Attempt to verify the profile by searching for code on the page
-      const res = await fetch('http://localhost:5000/api/verification/confirm', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/verification/confirm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -758,7 +764,7 @@ function Platforms({ profile, tokenState }) {
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/users/platform', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/platform`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -774,11 +780,9 @@ function Platforms({ profile, tokenState }) {
       }
 
       // Update local state to reflect the removal
-      setProfiles(current => 
-        current.map(p => 
-          p.id === platformName 
-            ? { ...p, verified: false, url: '' }
-            : p
+      setProfiles(current =>
+        current.map(p =>
+          p.id === platformId ? { ...p, verified: false, url: '' } : p
         )
       );
 
@@ -951,7 +955,7 @@ function Platforms({ profile, tokenState }) {
               return;
             }
 
-            const res = await fetch('http://localhost:5000/api/users/sections', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -967,7 +971,7 @@ function Platforms({ profile, tokenState }) {
             const data = await res.json();
             alert("Platforms saved successfully");
             // Refresh the profile data to show updated information
-            const profileRes = await fetch('http://localhost:5000/api/users/profile', {
+            const profileRes = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',

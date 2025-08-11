@@ -26,7 +26,7 @@ export default function Home() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
-        const res = await fetch("http://localhost:5000/api/users/portfolio", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/portfolio`, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
             "Content-Type": "application/json",
