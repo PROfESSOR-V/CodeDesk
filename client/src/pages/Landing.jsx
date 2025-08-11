@@ -1,5 +1,5 @@
 import LandingNavbar from "../components/LandingNavbar.jsx";
-import heroImg from "../assests/Screenshot 2025-07-23 161414.png";
+import heroImg from "../assests/Screenshot 2025-08-02 100819.png";
 import BrandName from "../components/BrandName.jsx";
 import lcLogo from "../assests/leetcode-logo.png";
 import cfLogo from "../assests/codeforces-logo.png";
