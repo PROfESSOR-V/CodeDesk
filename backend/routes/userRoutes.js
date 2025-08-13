@@ -1,6 +1,5 @@
 import { 
   getUserProfile,
-  syncSupabaseUser, 
   updateUserProfile,
   updateUserSections,
   removePlatform
@@ -11,7 +10,6 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 router.get("/profile", protect, getUserProfile);
-router.post("/sync", syncSupabaseUser);
 router.put("/profile", protect, updateUserProfile);
 router.put("/sections", protect, updateUserSections);
 router.delete("/platform", protect, removePlatform);

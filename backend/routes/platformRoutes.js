@@ -101,10 +101,8 @@ router.post("/verify", protect, async (req, res) => {
         );
 
         if (isVerified) {
-            verification.status = "verified";
-            verification.verifiedAt = new Date();
-            await verification.save();
-
+            // Mark as verified via Supabase helper
+            await updateVerificationStatus(req.user.id, platformId, true);
             res.json({
                 success: true,
                 verified: true,
