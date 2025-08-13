@@ -243,7 +243,7 @@ Thanks to these amazing people who have contributed to the **CodeDesk** project:
 
 <!-- readme: contributors -start -->
 <p align="center">
-    <img src="https://api.vaunt.dev/v1/github/entities/PROfESSOR-V/repositories/CodeDesk/contributors?format=svg&limit=54" width="1000" />
+    <img src="https://api.vaunt.dev/v1/github/entities/PROfESSOR-V/repositories/CodeDesk/contributors?format=svg&limit=54" width="500" />
 </p>
 <!-- readme: contributors -end -->
 
