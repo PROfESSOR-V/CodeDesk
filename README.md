@@ -242,8 +242,9 @@ Thanks to these amazing people who have contributed to the **CodeDesk** project:
 
 <!-- readme: contributors -start -->
 <p align="center">
-    <img src="https://api.vaunt.dev/v1/github/entities/PROfESSOR-V/repositories/CodeDesk/contributors?format=svg&limit=54" width="500" />
+  <img src="https://contrib.rocks/image?repo=PROfESSOR-V/CodeDesk" width="200" />
 </p>
+
 <!-- readme: contributors -end -->
 
 <p style="font-family:var(--ff-philosopher);font-size:3rem;"><b> Show some <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Red%20Heart.png" alt="Red Heart" width="40" height="40" /> by starring this awesome repository!
