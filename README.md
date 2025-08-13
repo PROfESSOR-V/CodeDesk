@@ -45,7 +45,6 @@ CodeDesk is a full-stack web application designed to help developers and learner
   <b>This project is now OFFICIALLY accepted for:</b>
 </p>
 
-![GSSoC Logo](https://github.com/PROfESSOR-V/CodeDesk/blob/main/client/src/assests/gssoc%20logo.png)
 
 🌟 **Exciting News...**
 
