@@ -14,8 +14,22 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordScore, setPasswordScore] = useState(0);
+  const [passwordRequirements, setPasswordRequirements] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  const checkPasswordStrength = (password) => {
+  const conditions = [
+    { text: "At least 8 characters long", met: password.length >= 8 },
+    { text: "Contains at least one uppercase letter", met: /[A-Z]/.test(password) },
+    { text: "Contains at least one lowercase letter", met: /[a-z]/.test(password) },
+    { text: "Contains at least one number", met: /[0-9]/.test(password) },
+    { text: "Contains at least one special character", met: /[^A-Za-z0-9]/.test(password) },
+  ];
+  const score = conditions.filter(c => c.met).length;
+  return { score, conditions };
+};
 
   useEffect(() => {
     if (formRef.current) {
@@ -46,7 +60,11 @@ export default function Signup() {
       setError("Please fill in all fields");
       return;
     }
-
+    const { score } = checkPasswordStrength(password);
+    if (score < 5) { // Require all 5 conditions to be met for a strong password
+      setError("Password does not meet all security requirements.");
+      return;
+    }
     try {
       setIsLoading(true);
       setError(null);
@@ -139,10 +157,26 @@ export default function Signup() {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                const newPassword = e.target.value;
+                setPassword(newPassword);
+                const { score, conditions } = checkPasswordStrength(newPassword);
+                setPasswordScore(score);
+                setPasswordRequirements(conditions);
+                }}
                 className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829]"
                 placeholder="Create password"
               />
+              {password && (
+                <div className="mt-2 text-sm space-y-1">
+                  {passwordRequirements.map((req, index) => (
+                    <div key={index} className={`flex items-center gap-2 ${req.met ? "text-green-500" : "text-gray-500"}`}>
+                      {req.met ? <span className="text-green-500">✓</span> : <span className="text-gray-400">✗</span>}
+                      <span>{req.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="text-right mt-1">
                 <button
                   type="button"
