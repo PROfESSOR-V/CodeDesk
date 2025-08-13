@@ -19,31 +19,6 @@ export const getUserProfile = asyncHandler(async (req, res) => {
   res.json(data || {});
 });
 
-// @desc    Sync Supabase user to MongoDB
-// @route   POST /api/users/sync
-// @access  Public (called by frontend or webhook)
-export const syncSupabaseUser = asyncHandler(async (req, res) => {
-  const { supabaseId, email, name } = req.body;
-  if (!supabaseId || !email) {
-    res.status(400);
-    throw new Error("Missing supabaseId or email");
-  }
-
-  let user = await User.findOne({ email });
-  if (user) {
-    if (!user.supabaseId) {
-      user.supabaseId = supabaseId;
-      await user.save();
-    }
-  } else {
-    user = await User.create({ name: name || "", email, supabaseId });
-  }
-
-  const { generateToken } = await import("../utils/generateToken.js");
-  const token = generateToken(user._id, user.role);
-  res.status(200).json({ message: "User synced", userId: user._id, token });
-});
-
 // @desc    Update user basic info
 // @route   PUT /api/users/profile
 // @access  Private

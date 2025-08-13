@@ -45,7 +45,6 @@ CodeDesk is a full-stack web application designed to help developers and learner
   <b>This project is now OFFICIALLY accepted for:</b>
 </p>
 
-![GSSoC Logo](/CodeDesk/client/src/assests/gssoc%20logo.png)
 
 🌟 **Exciting News...**
 
@@ -242,7 +241,9 @@ Thanks to these amazing people who have contributed to the **CodeDesk** project:
   We love our contributors! If you'd like to help, please check out our [`CONTRIBUTE.md`](https://github.com/PROfESSOR-V/CodeDesk/blob/main/CONTRIBUTING%20.md) file for guidelines.
 
 <!-- readme: contributors -start -->
-![contributors-img.web.app](https://contributors-img.web.app/image?repo=PROfESSOR-V/CodeDesk)
+<p align="center">
+  <img src="https://contrib.rocks/image?repo=PROfESSOR-V/CodeDesk" width="200" />
+</p>
 <!-- readme: contributors -end -->
 
 <p style="font-family:var(--ff-philosopher);font-size:3rem;"><b> Show some <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Red%20Heart.png" alt="Red Heart" width="40" height="40" /> by starring this awesome repository!
