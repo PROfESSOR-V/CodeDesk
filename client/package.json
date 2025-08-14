@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-        "dev": "vite",
-        "build": "node ./node_modules/vite/bin/vite.js build",
-        "preview": "vite preview"
+    "dev": "vite",
+    "build": "node ./node_modules/vite/bin/vite.js build",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.42.4",
+    "animejs": "^3.2.1",
+    "axios": "^1.11.0",
     "react": "^18.2.0",
+    "react-calendar-heatmap": "^1.8.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
-    "react-router-dom": "^6.19.0",
-    "react-calendar-heatmap": "^1.8.0",
-    "animejs": "^3.2.1",
-    "@supabase/supabase-js": "^2.42.4"
+    "react-router-dom": "^6.19.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
@@ -23,4 +24,4 @@
     "tailwindcss": "^3.4.1",
     "vite": "^5.0.0"
   }
-} 
+}
