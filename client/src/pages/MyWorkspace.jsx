@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { supabase } from '../supabaseClient';
 import { FaStickyNote, FaBookmark, FaTrash, FaArrowLeft } from 'react-icons/fa'; // 1. Import the back arrow icon
 import { useNavigate } from 'react-router-dom'; // 2. Import useNavigate
 import Sidebar from '../components/Sidebar.jsx';
@@ -13,27 +14,27 @@ const MyWorkspace = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navigate = useNavigate(); // 3. Initialize the navigate function
 
-    const API_URL = import.meta.env.VITE_API_URL;
+	const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-    // Helper function to get the auth token from localStorage
-    const getAuthToken = () => {
-        const authDataString = localStorage.getItem('codedesk_auth');
-        if (!authDataString) {
-            console.error("Auth data not found in localStorage.");
-            return null;
-        }
+    // Helper to get a valid bearer token from Supabase session (fallback to storage parsing)
+    const getAuthToken = async () => {
         try {
-            const authData = JSON.parse(authDataString);
-            return authData.access_token || null;
-        } catch (e) {
-            console.error("Failed to parse auth data from localStorage", e);
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) return session.access_token;
+        } catch (_) {}
+        try {
+            const authDataString = localStorage.getItem('codedesk_auth');
+            if (!authDataString) return null;
+            const parsed = JSON.parse(authDataString);
+            return parsed?.currentSession?.access_token || parsed?.access_token || null;
+        } catch (_) {
             return null;
         }
     };
 
     useEffect(() => {
         const fetchWorkspaceData = async () => {
-            const token = getAuthToken();
+            const token = await getAuthToken();
             if (!token) {
                 setError("Authentication failed. Please log in again.");
                 setLoading(false);
@@ -59,7 +60,7 @@ const MyWorkspace = () => {
     const handleCreateNote = async (e) => {
         e.preventDefault();
         if (!newNote.trim()) return;
-        const token = getAuthToken();
+        const token = await getAuthToken();
         if (!token) { setError("Authentication failed."); return; }
 
         try {
@@ -74,7 +75,7 @@ const MyWorkspace = () => {
     
     const handleDeleteNote = async (noteId) => {
         if (!window.confirm("Are you sure you want to delete this note?")) return;
-        const token = getAuthToken();
+        const token = await getAuthToken();
         if (!token) { setError("Authentication failed."); return; }
 
         try {

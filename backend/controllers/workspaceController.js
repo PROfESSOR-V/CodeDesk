@@ -21,7 +21,7 @@ export const getWorkspaceData = async (req, res) => {
             .select(`
                 sheet_id,
                 saved_at,
-                sheets (id, title, description) // Adjust fields as needed
+                sheets (id, title, description)
             `)
             .eq('user_id', user.id);
 
