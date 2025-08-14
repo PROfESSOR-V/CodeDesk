@@ -42,6 +42,9 @@ export default function Sidebar({ open = true }) {
       case 'Portfolio':
         navigate('/portfolio');
         break;
+      case 'My Workspace': // This is the new case
+        navigate('/workspace');
+        break;
       default:
         // Other menu items not implemented yet
         break;
@@ -88,4 +91,4 @@ export default function Sidebar({ open = true }) {
       </div>
     </aside>
   );
-} 
+}

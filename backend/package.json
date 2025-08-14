@@ -23,7 +23,6 @@
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
-    "mongoose": "^8.17.1",
     "puppeteer": "^22.5.0"
   },
   "devDependencies": {
