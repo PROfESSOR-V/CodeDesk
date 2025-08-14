@@ -37,7 +37,11 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     .from("profiles")
     .upsert({ supabase_id: req.user.id, ...updatePayload }, { onConflict: "supabase_id" });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("Supabase error updating profile:", error);
+    res.status(400); // Use 400 for client-side error, 500 for db issue
+    throw new Error(error.message);
+  }
 
   res.json({ message: "Profile updated" });
 });
@@ -102,4 +106,68 @@ export const removePlatform = asyncHandler(async (req, res) => {
   res.json({ message: 'Platform removed', platforms: updated });
 }); 
 
-// portfolio endpoint removed
+// @desc    Get user portfolio data (for dashboard)
+// @route   GET /api/users/portfolio
+// @access  Private
+export const getUserPortfolio = asyncHandler(async (req, res) => {
+  const { data, error } = await supabaseAdmin
+    .from("total_stats")
+    .select("total_questions_solved, total_contests_attended, unified_activity")
+    .eq("supabase_id", req.user.id)
+    .single();
+
+  if (error && error.code !== "PGRST116") { // Ignore error if no row is found
+    console.error("Error fetching user portfolio:", error);
+    throw new Error(error.message);
+  }
+
+  res.json(data || {
+    total_questions_solved: 0,
+    total_contests_attended: 0,
+    unified_activity: []
+  });
+});
+
+// @desc    Sync Supabase auth user with public.profiles table
+// @route   POST /api/users/sync
+// @access  Public (or protected, depending on desired flow)
+export const syncUser = asyncHandler(async (req, res) => {
+  const { supabaseId, email, name } = req.body;
+
+  if (!supabaseId || !email) {
+    res.status(400);
+    throw new Error("Supabase ID and email are required.");
+  }
+
+  // Upsert into profiles to create a profile if it doesn't exist
+  const { error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .upsert(
+      {
+        supabase_id: supabaseId,
+        first_name: name.split(' ')[0] || '',
+        last_name: name.split(' ').slice(1).join(' ') || ''
+      },
+      { onConflict: "supabase_id", ignoreDuplicates: true }
+    );
+
+  if (profileError) {
+    console.error("Error syncing user profile:", profileError);
+    throw new Error(profileError.message);
+  }
+
+  // Upsert into total_stats to ensure a stats row exists
+  const { error: statsError } = await supabaseAdmin
+    .from("total_stats")
+    .upsert(
+      { supabase_id: supabaseId },
+      { onConflict: "supabase_id", ignoreDuplicates: true }
+    );
+
+  if (statsError) {
+    console.error("Error syncing user total_stats:", statsError);
+    throw new Error(statsError.message);
+  }
+
+  res.status(200).json({ message: "User synced successfully" });
+});

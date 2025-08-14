@@ -8,6 +8,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
+import codeforcesRoutes from "./routes/codeforcesRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
 
 // Removed legacy Mongo routes
@@ -60,7 +61,8 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
-app.use("/api/workspace", workspaceRoutes); // 2. Mount the new workspace routes
+app.use("/api/codeforces", codeforcesRoutes);
+app.use("/api/workspace", workspaceRoutes); 
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
