@@ -121,15 +121,35 @@ export const getUserPortfolio = asyncHandler(async (req, res) => {
     throw new Error(error.message);
   }
 
-  const unified_activity = Array.isArray(data?.heatmap)
+  const unifiedActivity = Array.isArray(data?.heatmap)
     ? data.heatmap
     : (() => { try { return data?.heatmap ? JSON.parse(data.heatmap) : []; } catch { return []; } })();
 
-  res.json({
-    total_questions_solved: data?.total_questions_solved || 0,
-    total_contests_attended: data?.total_contests_attended || 0,
-    unified_activity
-  });
+  const totalQuestions = data?.total_questions_solved || 0;
+  const totalContests = data?.total_contests_attended || 0;
+
+  // Shape response to what client/src/pages/Portfolio.jsx expects
+  const response = {
+    user: {},
+    verifiedPlatforms: [],
+    aggregatedStats: {
+      totalQuestions,
+      totalActiveDays: unifiedActivity.length || 0,
+      totalRating: 0,
+      totalContests,
+      // The UI will further normalize these via problemDifficulty
+      easy: 0,
+      medium: 0,
+      hard: 0,
+    },
+    unifiedActivity,
+    contestRatings: [],
+    awards: [],
+    dsaTopics: {},
+    contributionData: {},
+  };
+
+  res.json(response);
 });
 
 // @desc    Sync Supabase auth user with public.profiles table
