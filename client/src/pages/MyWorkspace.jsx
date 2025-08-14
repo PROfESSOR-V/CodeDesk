@@ -43,12 +43,17 @@ const MyWorkspace = () => {
 
             try {
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const { data } = await axios.get(`${API_URL}/api/workspace`, config);
-                setNotes(data.notes || []);
-                setSavedSheets(data.savedSheets || []);
+                const res = await axios.get(`${API_URL}/api/workspace`, config);
+                setNotes(res.data?.notes || []);
+                setSavedSheets(res.data?.savedSheets || []);
             } catch (err) {
-                setError('Failed to fetch workspace data. Please try again.');
-                console.error(err);
+                const status = err?.response?.status;
+                const serverMsg = err?.response?.data?.message || err?.response?.data?.error;
+                const msg = status === 401
+                    ? 'Authentication failed. Please log in again.'
+                    : (serverMsg || 'Failed to fetch workspace data. Please try again.');
+                setError(msg);
+                console.error('GET /api/workspace failed', { status, serverMsg, err });
             } finally {
                 setLoading(false);
             }

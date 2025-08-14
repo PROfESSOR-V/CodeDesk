@@ -3,33 +3,52 @@ import { supabase } from '../config/supabaseClient.js';
 
 // Get all notes and saved sheets for the logged-in user
 export const getWorkspaceData = async (req, res) => {
-    const { user } = req; // Assuming auth middleware attaches user object
+    const { user } = req;
 
     try {
-        // Fetch notes
-        const { data: notes, error: notesError } = await supabase
-            .from('notes')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
+        // Notes may not exist yet; return empty array on table missing
+        let notes = [];
+        try {
+            const { data, error } = await supabase
+                .from('notes')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            notes = data || [];
+        } catch (e) {
+            // swallow table-not-found style errors and continue
+            notes = [];
+        }
 
-        if (notesError) throw notesError;
+        // Saved sheets with join; if join fails, fall back to plain ids
+        let savedSheets = [];
+        try {
+            const { data, error } = await supabase
+                .from('user_saved_sheets')
+                .select(`
+                    sheet_id,
+                    saved_at,
+                    sheets (id, title, description)
+                `)
+                .eq('user_id', user.id);
+            if (error) throw error;
+            savedSheets = data || [];
+        } catch (_) {
+            try {
+                const { data, error } = await supabase
+                    .from('user_saved_sheets')
+                    .select('sheet_id, saved_at')
+                    .eq('user_id', user.id);
+                if (!error) savedSheets = data || [];
+            } catch (_) {
+                savedSheets = [];
+            }
+        }
 
-        // Fetch saved sheets (joining with the sheets table to get details)
-        const { data: savedSheets, error: sheetsError } = await supabase
-            .from('user_saved_sheets')
-            .select(`
-                sheet_id,
-                saved_at,
-                sheets (id, title, description)
-            `)
-            .eq('user_id', user.id);
-
-        if (sheetsError) throw sheetsError;
-
-        res.status(200).json({ notes, savedSheets });
+        return res.status(200).json({ notes, savedSheets });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
