@@ -9,6 +9,8 @@ import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
 import codeforcesRoutes from "./routes/codeforcesRoutes.js";
+import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
+
 // Removed legacy Mongo routes
 
 dotenv.config();
@@ -60,6 +62,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/codeforces", codeforcesRoutes);
+app.use("/api/workspace", workspaceRoutes); // 2. Mount the new works
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
@@ -68,4 +71,4 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
