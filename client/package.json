@@ -10,9 +10,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.42.4",
     "animejs": "^3.2.1",
-    feat/login-signup-loading-state
+    
     "axios": "^1.11.0",
-    main
+  
     "react": "^18.2.0",
     "react-calendar-heatmap": "^1.8.0",
     "react-dom": "^18.2.0",
