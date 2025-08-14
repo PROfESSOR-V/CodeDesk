@@ -219,6 +219,54 @@ create policy "Users can update own profile."
   using ( auth.uid() = supabase_id );
 ```
 
+5) Create table for workspace simply run this query in SQL editor
+
+```sql
+-- Create the table for sheets (if it doesn't exist)
+CREATE TABLE IF NOT EXISTS public.sheets (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Create the table for notes
+CREATE TABLE public.notes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  content TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Security: Enable Row Level Security (RLS) for notes
+ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
+
+-- Security: Define policies so users can only access their own notes
+CREATE POLICY "Users can manage their own notes."
+  ON public.notes FOR ALL
+  USING ( auth.uid() = user_id )
+  WITH CHECK ( auth.uid() = user_id );
+
+-- Create a join table for saved sheets
+CREATE TABLE public.user_saved_sheets (
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  sheet_id UUID REFERENCES public.sheets(id) ON DELETE CASCADE NOT NULL,
+  saved_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  PRIMARY KEY (user_id, sheet_id)
+);
+
+-- Security: Enable RLS for the join table
+ALTER TABLE public.user_saved_sheets ENABLE ROW LEVEL SECURITY;
+
+-- Security: Define policies for the join table
+CREATE POLICY "Users can manage their own saved sheets."
+  ON public.user_saved_sheets FOR ALL
+  USING ( auth.uid() = user_id )
+  WITH CHECK ( auth.uid() = user_id );
+```
+
 <div align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
 </div>
