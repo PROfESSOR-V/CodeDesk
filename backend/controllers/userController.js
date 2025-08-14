@@ -112,7 +112,7 @@ export const removePlatform = asyncHandler(async (req, res) => {
 export const getUserPortfolio = asyncHandler(async (req, res) => {
   const { data, error } = await supabaseAdmin
     .from("total_stats")
-    .select("total_questions_solved, total_contests_attended, unified_activity")
+    .select("total_questions_solved, total_contests_attended, heatmap")
     .eq("supabase_id", req.user.id)
     .single();
 
@@ -121,10 +121,14 @@ export const getUserPortfolio = asyncHandler(async (req, res) => {
     throw new Error(error.message);
   }
 
-  res.json(data || {
-    total_questions_solved: 0,
-    total_contests_attended: 0,
-    unified_activity: []
+  const unified_activity = Array.isArray(data?.heatmap)
+    ? data.heatmap
+    : (() => { try { return data?.heatmap ? JSON.parse(data.heatmap) : []; } catch { return []; } })();
+
+  res.json({
+    total_questions_solved: data?.total_questions_solved || 0,
+    total_contests_attended: data?.total_contests_attended || 0,
+    unified_activity
   });
 });
 
