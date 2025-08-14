@@ -62,7 +62,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/codeforces", codeforcesRoutes);
-app.use("/api/workspace", workspaceRoutes); // 2. Mount the new works
+app.use("/api/workspace", workspaceRoutes); 
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
