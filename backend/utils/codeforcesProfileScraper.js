@@ -278,6 +278,9 @@ class CodeforcesProfileScraper {
             contestHistory: contests,
             totalContests: contests.length,
             
+            // Activity data for heatmap
+            activityData: this.generateActivityData(submissions),
+            
             // Raw data for future processing
             ratingHistory: ratingHistory,
             recentSubmissions: submissions.slice(0, 100), // Keep last 100 submissions
@@ -362,6 +365,37 @@ class CodeforcesProfileScraper {
         });
 
         return tagCount;
+    }
+
+    /**
+     * Generate activity data for heatmap from submissions
+     * @param {Array} submissions - Array of submission objects
+     * @returns {Array} Activity data in format [{date: "2024-01-15", count: 5}, ...]
+     */
+    generateActivityData(submissions) {
+        const activityMap = new Map();
+        
+        submissions.forEach(submission => {
+            if (submission.creationTimeSeconds) {
+                // Convert timestamp to date string (YYYY-MM-DD)
+                const date = new Date(submission.creationTimeSeconds * 1000);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // Count submissions per day
+                activityMap.set(dateStr, (activityMap.get(dateStr) || 0) + 1);
+            }
+        });
+
+        // Convert map to array format expected by heatmap component
+        const activityData = Array.from(activityMap.entries()).map(([date, count]) => ({
+            date,
+            count
+        }));
+
+        // Sort by date (oldest first)
+        activityData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        return activityData;
     }
 }
 

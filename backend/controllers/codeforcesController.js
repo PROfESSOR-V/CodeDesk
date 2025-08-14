@@ -56,6 +56,7 @@ export const scrapeCodeforcesProfile = asyncHandler(async (req, res) => {
                 submission_stats: profileData.submissionStats,
                 language_stats: profileData.languageStats,
                 tag_stats: profileData.tagStats,
+                activity_data: profileData.activityData,
                 last_refreshed_at: new Date().toISOString()
             }, { 
                 onConflict: 'supabase_id',
