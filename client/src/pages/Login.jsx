@@ -52,7 +52,10 @@ export default function Login() {
             try {
               const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sync`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${data.session.access_token}`
+                },
                 body: JSON.stringify({ supabaseId: user.id, email: user.email, name: user.user_metadata?.name || "" }),
               });
 
