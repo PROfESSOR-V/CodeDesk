@@ -12,7 +12,7 @@ const MyWorkspace = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const navigate = useNavigate(); // 3. Initialize the navigate function
+    const navigate = useNavigate();
 
 	const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
