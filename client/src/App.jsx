@@ -5,7 +5,10 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
 import Portfolio from "./pages/Portfolio.jsx";
-import MyWorkspace from "./pages/MyWorkspace.jsx"; // 1. Import the new page component
+import Footer from "./components/Footer.jsx";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import MyWorkspace from "./pages/MyWorkspace.jsx";
 
 export default function App() {
   return (
@@ -17,8 +20,11 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile/edit" element={<EditProfile />} />
         <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/workspace" element={<MyWorkspace />} /> {/* 2. Add the route for the new page */}
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/workspace" element={<MyWorkspace />} /> 
       </Routes>
+      <Footer />
     </Router>
   );
 }
