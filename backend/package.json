@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon app.js",
     "seed": "node seed/seedData.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "vitest"
   },
   "keywords": [
     "codedesk",
@@ -20,14 +21,19 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.42.4",
     "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
+    "mongoose": "^8.17.1",
     "puppeteer": "^22.5.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "jest": "^30.0.5",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
   }
 }

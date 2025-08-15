@@ -1,5 +1,6 @@
-const request = require('supertest');
-const app = require('../app');
+import request from 'supertest';
+import { describe, it, expect } from 'vitest';
+import app from '../app.js';
 
 describe('User Controller', () => {
   it('should return 400 for missing supabaseId or email', async () => {
@@ -9,5 +10,4 @@ describe('User Controller', () => {
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toMatch(/Missing supabaseId or email/);
   });
-  // Add more tests for userController as needed
 });
