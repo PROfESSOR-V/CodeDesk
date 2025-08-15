@@ -11,7 +11,6 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.42.4",
     "animejs": "^3.2.1",
-    
     "axios": "^1.11.0",
     "lucide-react": "^0.539.0",
     "react": "^18.2.0",
@@ -21,10 +20,19 @@
     "react-router-dom": "^6.19.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.14",
+    "babel-jest": "^30.0.5",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "jsdom": "^26.1.0",
     "postcss": "^8.4.24",
     "tailwindcss": "^3.4.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4"
   }
 }
