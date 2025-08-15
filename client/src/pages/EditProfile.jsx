@@ -4,12 +4,6 @@ import anime from "animejs";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
-// Helper function to check authentication
-const checkAuthentication = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
-};
-
 const sections = [
   { id: "basic", label: "Basic Info", icon: <FaUser /> },
   { id: "about", label: "About me", icon: <FaImage /> },
@@ -28,7 +22,7 @@ export default function EditProfile() {
   const mainRef = useRef(null);
   const [tokenState, setTokenState] = useState("");
 
-  // Check authentication on component mount
+  // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -39,34 +33,32 @@ export default function EditProfile() {
     checkAuth();
   }, [navigate]);
 
-  // Set up auth state listener
+  // Supabase auth listener
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token) setTokenState(session.access_token);
+    };
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) setTokenState(session.access_token);
+      else setTokenState("");
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.access_token) {
-        setTokenState(session.access_token);
-      } else {
-        setTokenState("");
-      }
-    });
+
     return () => subscription.unsubscribe();
   }, []);
 
-  // fetch profile
+  // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Get the Supabase session
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          console.error('No session found');
           navigate('/login');
           return;
         }
 
-        // Fetch the logged-in user's profile
         const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile`, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -78,6 +70,7 @@ export default function EditProfile() {
           navigate('/login');
           return;
         }
+
         if (!res.ok) {
           console.error('Failed to fetch profile:', res.status);
           setProfile(null);
@@ -88,13 +81,13 @@ export default function EditProfile() {
         setProfile(data);
       } catch (error) {
         console.error('Error fetching profile:', error);
-        // Do not redirect on generic network/CORS errors; keep user on page
       }
     };
 
     fetchProfile();
   }, [navigate]);
 
+  // Animate section transitions
   useEffect(() => {
     if (mainRef.current) {
       anime({
@@ -107,7 +100,6 @@ export default function EditProfile() {
       });
     }
   }, [active]);
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
