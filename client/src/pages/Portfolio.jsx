@@ -45,7 +45,11 @@ const Portfolio = () => {
   const [showGetCardModal, setShowGetCardModal] = useState(false);
   const [profile, setProfile] = useState(null);
   const [authEmail, setAuthEmail] = useState("");
+ fixed
   
+
+  const [codeforcesData, setCodeforcesData] = useState(null);
+ main
 
   // Trigger GFG scraper on each page load/refresh if user has verified GFG profile
   useEffect(() => {
@@ -87,6 +91,7 @@ const Portfolio = () => {
     // Load portfolio (may be empty) and user profile in parallel
     fetchPortfolioData();
     fetchUserProfile();
+    fetchCodeforcesData();
   }, []);
 
   const fetchPortfolioData = async () => {
@@ -180,6 +185,48 @@ const Portfolio = () => {
     </DashboardLayout>
   );
 }
+
+  const fetchCodeforcesData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/codeforces/profile`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Extract the actual data from the nested response structure
+        const data = result.success ? result.data : result;
+        setCodeforcesData(data);
+        console.log('Codeforces data fetched:', data);
+      } else if (response.status === 404) {
+        // No Codeforces profile found - this is normal if user hasn't added one yet
+        setCodeforcesData(null);
+        console.log('No Codeforces profile found for user');
+      } else {
+        setCodeforcesData(null);
+        console.error('Failed to fetch Codeforces data:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching Codeforces data:', error);
+      setCodeforcesData(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
 
   // No platforms connected view
@@ -326,11 +373,13 @@ const Portfolio = () => {
             className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
           />
 
+
           {/* DSA Analysis */}
           <DSAAnalysisCard 
             dsaTopics={safeData.dsaTopics || {}} 
             className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
           />
+
 
         </div>
       </div>
@@ -772,4 +821,129 @@ const GetCardModal = ({ onClose }) => (
   </div>
 );
 
+
 export default Portfolio;
+
+// Codeforces Profile Card Component
+const CodeforcesProfileCard = ({ codeforcesData }) => (
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3">
+        <img 
+          src="/src/assests/codeforces-logo.png" 
+          alt="Codeforces" 
+          className="w-8 h-8"
+        />
+        <h3 className="text-xl font-bold text-gray-900">Codeforces Profile</h3>
+      </div>
+      <span className="text-sm text-gray-500">
+        Last updated: {new Date(codeforcesData.last_refreshed_at).toLocaleDateString()}
+      </span>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Basic Stats */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Handle</span>
+          <span className="font-bold text-blue-600">{codeforcesData.handle}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Current Rating</span>
+          <span className="font-bold text-green-600">{codeforcesData.rating || 'Unrated'}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Max Rating</span>
+          <span className="font-bold text-purple-600">{codeforcesData.max_rating || 'Unrated'}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Rank</span>
+          <span className="font-bold text-orange-600">{codeforcesData.rank || 'Unrated'}</span>
+        </div>
+      </div>
+
+      {/* Additional Stats */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Contribution</span>
+          <span className="font-bold text-blue-600">{codeforcesData.contribution || 0}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Friends</span>
+          <span className="font-bold text-green-600">{codeforcesData.friend_of_count || 0}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Contests</span>
+          <span className="font-bold text-purple-600">
+            {codeforcesData.contest_history ? codeforcesData.contest_history.length : 0}
+          </span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Problems Solved</span>
+          <span className="font-bold text-orange-600">
+            {codeforcesData.submission_stats?.accepted || 0}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {/* Activity Heatmap */}
+    {codeforcesData.activity_data && codeforcesData.activity_data.length > 0 && (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Submission Activity</h4>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <ContributionHeatmap activity={codeforcesData.activity_data} />
+        </div>
+      </div>
+    )}
+
+    {/* Language Stats */}
+    {codeforcesData.language_stats && Object.keys(codeforcesData.language_stats).length > 0 && (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Programming Languages</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {Object.entries(codeforcesData.language_stats)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 6)
+            .map(([language, count]) => (
+              <div key={language} className="bg-blue-50 p-3 rounded-lg text-center">
+                <div className="font-bold text-blue-600">{count}</div>
+                <div className="text-sm text-gray-600">{language}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    )}
+
+    {/* Problem Tags */}
+    {codeforcesData.tag_stats && Object.keys(codeforcesData.tag_stats).length > 0 && (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Problem Categories</h4>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(codeforcesData.tag_stats)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10)
+            .map(([tag, count]) => (
+              <span 
+                key={tag} 
+                className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+              >
+                {tag} ({count})
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+export default Portfolio; 
+

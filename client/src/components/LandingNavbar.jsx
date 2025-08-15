@@ -8,6 +8,7 @@ export default function LandingNavbar() {
   const { darkMode, toggleDarkMode } = useTheme();
 
   return (
+ fixed
     <nav
       className={`flex items-center justify-between py-4 px-6 sticky top-0 z-20 shadow-sm transition-colors duration-300
         ${darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-800"}`}
@@ -17,6 +18,7 @@ export default function LandingNavbar() {
       </div>
 
       <ul className="hidden md:flex items-center gap-6 text-sm font-medium">
+
         <li>
           <button onClick={() => navigate('/signup')} className={`hover:text-[#e67829] ${darkMode ? "text-gray-200" : "text-gray-700"}`}>Leaderboard</button>
         </li>
@@ -30,6 +32,7 @@ export default function LandingNavbar() {
           <button onClick={() => navigate('/signup')} className={`hover:text-[#e67829] ${darkMode ? "text-gray-200" : "text-gray-700"}`}>Profile Tracker</button>
         </li>
       </ul>
+fixed
 
       <div className="flex items-center gap-3">
         {/* Dark/Light toggle */}
@@ -52,3 +55,4 @@ export default function LandingNavbar() {
     </nav>
   );
 }
+

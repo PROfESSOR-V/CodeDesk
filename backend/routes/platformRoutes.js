@@ -2,6 +2,7 @@ import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import { verifyPlatform } from "../utils/platformVerification.js";
 import { createVerification, updateVerificationStatus, getVerification, getAllVerifications, deleteVerification } from "../models/PlatformVerification.js";
+import platformController from "../controllers/platformController.js";
 
 const router = express.Router();
 
@@ -147,5 +148,8 @@ router.get("/verification-status/:platformId", protect, async (req, res) => {
         });
     }
 });
+
+// Mount the platform controller routes (includes /add route)
+router.use("/", platformController);
 
 export default router;

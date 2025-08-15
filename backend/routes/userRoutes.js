@@ -2,7 +2,9 @@ import {
   getUserProfile,
   updateUserProfile,
   updateUserSections,
-  removePlatform
+  removePlatform,
+  getUserPortfolio,
+  syncUser
 } from '../controllers/userController.js';
 
 import express from "express";
@@ -14,7 +16,8 @@ router.put("/profile", protect, updateUserProfile);
 router.put("/sections", protect, updateUserSections);
 router.delete("/platform", protect, removePlatform);
 
-// Portfolio route
-// portfolio endpoint removed
+// Portfolio and Sync routes
+router.get("/portfolio", protect, getUserPortfolio);
+router.post("/sync", protect, syncUser);
 
 export default router; 

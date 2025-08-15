@@ -825,6 +825,26 @@ function Platforms({ profile, tokenState }) {
         // Show success message
         alert(`${platform.label} profile verified successfully!`);
 
+        // If Codeforces verified, trigger backend scrape to populate stats
+        if (verifyTarget === "codeforces") {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const accessToken = session?.access_token;
+            const handle = (platform.url || "").split("/").filter(Boolean).pop();
+            const body = handle ? { codeforcesHandle: handle } : { profileUrl: platform.url };
+            await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/codeforces/scrape`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify(body),
+            });
+          } catch (cfErr) {
+            console.error("Codeforces scrape trigger failed:", cfErr);
+          }
+        }
+
         // Trigger external scraper service for GFG after verification
         if (verifyTarget === "gfg") {
           try {

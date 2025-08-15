@@ -40,6 +40,9 @@ export default function Sidebar({ open = true }) {
       case 'Portfolio':
         navigate('/portfolio');
         break;
+      case 'My Workspace': // This is the new case
+        navigate('/workspace');
+        break;
       default:
         break;
     }
