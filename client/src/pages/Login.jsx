@@ -13,6 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (formRef.current) {
@@ -40,6 +41,8 @@ export default function Login() {
 
   function handleLogin() {
     setError(null);
+    setIsLoading(true);
+
     supabase.auth
       .signInWithPassword({ email, password })
       .then(async ({ data, error }) => {
@@ -47,36 +50,36 @@ export default function Login() {
           setError(error.message);
         } else {
           const user = data?.user;
-          try {
-            // Attempt to sync the Supabase user with backend (optional)
+          if (user) {
             try {
               const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sync`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${data.session.access_token}`
+                },
                 body: JSON.stringify({ supabaseId: user.id, email: user.email, name: user.user_metadata?.name || "" }),
               });
 
-              if (res.ok) {
-                // Only attempt JSON parsing if server sent a body
-                const text = await res.text();
-                if (text) {
-                  const dataSync = JSON.parse(text);
-                  // backend returns token for legacy clients; we ignore to keep session only in Supabase
-                }
-              } else {
+              if (!res.ok) {
                 console.warn("/api/users/sync returned", res.status);
               }
             } catch (syncErr) {
               console.error("Sync failed", syncErr);
             }
-          } catch (e) {
-            console.error("Sync failed", e);
-          }
-          // No longer persisting token in browser storage – rely on Supabase session
-          navigate("/dashboard");
+            navigate("/dashboard");
+        } else {
+          setError("User not found after successful sign-in.");
         }
-      })
-      .catch((err) => setError(err.message));
+      }
+    })
+      .catch((err) => {
+      console.error("Login failed:", err);
+      setError(err.message);
+    })
+    .finally(() => {
+      setIsLoading(false); 
+    });
   }
 
   return (
@@ -114,9 +117,10 @@ export default function Login() {
             <button
               type="button"
               onClick={handleLogin}
-              className="w-full bg-[#e67829] text-white py-2 rounded shadow hover:bg-[#e67829]/90"
+              disabled={isLoading}
+              className="w-full bg-[#e67829] text-white py-2 rounded shadow hover:bg-[#e67829]/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
