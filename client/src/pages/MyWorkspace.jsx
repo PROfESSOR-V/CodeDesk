@@ -3,7 +3,7 @@ import axios from 'axios';
 import { supabase } from '../supabaseClient';
 import { FaStickyNote, FaBookmark, FaTrash, FaArrowLeft } from 'react-icons/fa'; // 1. Import the back arrow icon
 import { useNavigate } from 'react-router-dom'; // 2. Import useNavigate
-import Sidebar from '../components/Sidebar.jsx';
+import DashboardLayout from '../components/DashboardLayout';
 
 const MyWorkspace = () => {
     const [notes, setNotes] = useState([]);
@@ -11,7 +11,6 @@ const MyWorkspace = () => {
     const [newNote, setNewNote] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
     const navigate = useNavigate(); // 3. Initialize the navigate function
 
 	const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -93,10 +92,8 @@ const MyWorkspace = () => {
     };
 
     return (
-        <div className="flex bg-gray-50 min-h-screen">
-            <Sidebar open={sidebarOpen} />
-            
-            <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"}`}>
+        <DashboardLayout>
+            <main>
                 <div className="max-w-7xl mx-auto">
                     {/* 4. Updated header with Back Button */}
                     <header className="mb-8">
@@ -190,7 +187,7 @@ const MyWorkspace = () => {
                     )}
                 </div>
             </main>
-        </div>
+            </DashboardLayout>
     );
 };
 
