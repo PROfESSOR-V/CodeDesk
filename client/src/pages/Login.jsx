@@ -2,6 +2,9 @@ import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import anime from "animejs";
+// Your import (causing the error)
+import { ThemeContext } from '/src/context/ThemeContext.jsx';
+
 import BrandName from "../components/BrandName.jsx";
 import { useState } from "react";
 import { supabase } from "../supabaseClient.js";
