@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js",
-    "postinstall": "puppeteer browsers install chrome"
+    "start": "node app.js"
   },
   "keywords": [
     "codedesk",
