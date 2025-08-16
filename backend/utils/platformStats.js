@@ -91,7 +91,7 @@ async function leetCodeStats(profileUrl) {
     return {
       platform: "leetcode",
       username: u.username,
-      displayName: u.profile.realName || u.username,
+      displayName: u.profile.realName || (u.profile.aboutMe ? u.profile.aboutMe.slice(0, 120) : '') || u.username,
       ranking: u.profile.ranking,
       totalSolved,
       easySolved: difficulties.easy,
