@@ -10,21 +10,27 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import MyWorkspace from "./pages/MyWorkspace.jsx";
 
+// 🔑 import ThemeProvider + hook
+import { ThemeProvider } from "./ThemeContext";
+
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/dashboard" element={<DashboardLayout />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/profile/edit" element={<EditProfile />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/workspace" element={<MyWorkspace />} /> 
-      </Routes>
-      <Footer />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/dashboard" element={<DashboardLayout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/workspace" element={<MyWorkspace />} /> 
+        </Routes>
+        <Footer />
+      </Router>
+    </ThemeProvider>
   );
 }
+
