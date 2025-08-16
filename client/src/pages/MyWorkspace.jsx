@@ -32,63 +32,52 @@ const MyWorkspace = () => {
     };
 
     useEffect(() => {
-        const fetchWorkspaceData = async () => {
-            const token = await getAuthToken();
+        const fetchWorkspaceData = () => {
+            const token = 'mock-token-for-preview';
             if (!token) {
                 setError("Authentication failed. Please log in again.");
                 setLoading(false);
                 return;
             }
 
-            try {
-                const config = { headers: { Authorization: `Bearer ${token}` } };
-                const res = await axios.get(`${API_URL}/api/workspace`, config);
-                setNotes(res.data?.notes || []);
-                setSavedSheets(res.data?.savedSheets || []);
-            } catch (err) {
-                const status = err?.response?.status;
-                const serverMsg = err?.response?.data?.message || err?.response?.data?.error;
-                const msg = status === 401
-                    ? 'Authentication failed. Please log in again.'
-                    : (serverMsg || 'Failed to fetch workspace data. Please try again.');
-                setError(msg);
-                console.error('GET /api/workspace failed', { status, serverMsg, err });
-            } finally {
+            const mockNotes = [
+                { id: 1, content: "Review project proposal for Q4." },
+                { id: 2, content: "Research new React hooks for state management." }
+            ];
+            const mockSavedSheets = [
+                { sheet_id: 101, sheets: { title: "JavaScript ES6+ Cheatsheet", description: "Quick reference for modern JavaScript syntax and features." } },
+                { sheet_id: 102, sheets: { title: "CSS Flexbox & Grid Guide", description: "A guide to building modern, responsive layouts with CSS." } },
+                { sheet_id: 103, sheets: { title: "Common Data Structures (DSA)", description: "Visual guide and complexity analysis for common data structures." } },
+                { sheet_id: 104, sheets: { title: "React Hooks Quick Guide", description: "Essential information on `useState`, `useEffect`, and other hooks." } },
+                { sheet_id: 105, sheets: { title: "Python Flask REST API Guide", description: "A step-by-step guide to building a simple API with Flask." } }
+            ];
+            
+            setTimeout(() => {
+                setNotes(mockNotes);
+                setSavedSheets(mockSavedSheets);
                 setLoading(false);
-            }
+            }, 1000); 
         };
 
         fetchWorkspaceData();
-    }, [API_URL]);
+    }, []);
 
-    const handleCreateNote = async (e) => {
+    const handleCreateNote = (e) => {
         e.preventDefault();
         if (!newNote.trim()) return;
-        const token = await getAuthToken();
-        if (!token) { setError("Authentication failed."); return; }
-
-        try {
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data: createdNote } = await axios.post(`${API_URL}/api/workspace/notes`, { content: newNote }, config);
-            setNotes([createdNote, ...notes]);
-            setNewNote('');
-        } catch (err) {
-            setError('Failed to create note.');
-        }
+        const createdNote = { id: Date.now(), content: newNote };
+        setNotes([createdNote, ...notes]);
+        setNewNote('');
     };
     
-    const handleDeleteNote = async (noteId) => {
+    const handleDeleteNote = (noteId) => {
         if (!window.confirm("Are you sure you want to delete this note?")) return;
-        const token = await getAuthToken();
-        if (!token) { setError("Authentication failed."); return; }
-
-        try {
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.delete(`${API_URL}/api/workspace/notes/${noteId}`, config);
-            setNotes(notes.filter(note => note.id !== noteId));
-        } catch (err) {
-            setError('Failed to delete note.');
-        }
+        setNotes(notes.filter(note => note.id !== noteId));
+    };
+    
+    const handleUnsaveSheet = (sheetId) => {
+        if (!window.confirm("Are you sure you want to remove this saved sheet?")) return;
+        setSavedSheets(savedSheets.filter(sheet => sheet.sheet_id !== sheetId));
     };
 
     return (
@@ -171,9 +160,24 @@ const MyWorkspace = () => {
                                 <div className="space-y-4 max-h-[40rem] overflow-y-auto pr-2">
                                     {savedSheets.length > 0 ? (
                                         savedSheets.map(item => (
-                                            <div key={item.sheet_id} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition cursor-pointer">
-                                                <h3 className="text-lg font-bold text-gray-800">{item.sheets.title}</h3>
-                                                <p className="text-gray-600 mt-1">{item.sheets.description}</p>
+                                            <div key={item.sheet_id} className="bg-gray-50 p-4 rounded-lg flex justify-between items-center group hover:bg-gray-100 transition">
+                                                <div 
+                                                    onClick={() => navigate(`/sheets/${item.sheet_id}`)}
+                                                    className="flex-1 cursor-pointer"
+                                                >
+                                                    <h3 className="text-lg font-bold text-gray-800">{item.sheets.title}</h3>
+                                                    <p className="text-gray-600 mt-1">{item.sheets.description}</p>
+                                                </div>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); 
+                                                        handleUnsaveSheet(item.sheet_id);
+                                                    }} 
+                                                    className="text-gray-400 hover:text-red-500 ml-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    aria-label="Remove saved sheet"
+                                                >
+                                                    <FaTrash />
+                                                </button>
                                             </div>
                                         ))
                                     ) : (
