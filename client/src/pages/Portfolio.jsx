@@ -255,7 +255,9 @@ const Portfolio = () => {
 
   // Always render the page; fall back to EMPTY_PORTFOLIO if data missing
   const safeData = portfolioData || EMPTY_PORTFOLIO;
-  const verifiedFromProfile = (profile?.platforms || []).filter(p => p.verified).map(p => ({ platform: p.id }));
+  const verifiedFromProfile = Array.isArray(profile?.platforms)
+    ? profile.platforms.filter((p) => p.verified).map((p) => ({ platform: p.id }))
+    : [];
   const userForCard = {
     username: profile?.username || "",
     fullName: profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim(),
