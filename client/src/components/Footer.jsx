@@ -1,13 +1,20 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import BrandName from "./BrandName.jsx";
 
 export default function Footer() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Detect pages where a sidebar exists
+  const sidebarPages = ["/dashboard", "/portfolio", "/workspace"];
+  const needsSidebarSpacing = sidebarPages.some((p) => location.pathname.startsWith(p));
+
+  const marginClass = needsSidebarSpacing ? "md:ml-16 lg:ml-64" : "";
 
   return (
-    <footer className="bg-[#e9ecef] text-gray-900 py-8 mt-10">
+    <footer className={`bg-[#e9ecef] text-gray-900 py-8 mt-10 transition-all duration-300 ${marginClass}`}>
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         
         {/* Branding */}
