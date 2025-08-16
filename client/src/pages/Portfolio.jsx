@@ -39,6 +39,7 @@ const Portfolio = () => {
   const [profile, setProfile] = useState(null);
   const [authEmail, setAuthEmail] = useState("");
   const [codeforcesData, setCodeforcesData] = useState(null);
+  const [gfgData, setGfgData] = useState(null);
 
   // Trigger GFG scraper on each page load/refresh if user has verified GFG profile
   useEffect(() => {
@@ -81,6 +82,7 @@ const Portfolio = () => {
     fetchPortfolioData();
     fetchUserProfile();
     fetchCodeforcesData();
+    fetchGfgData();
   }, []);
 
   const fetchPortfolioData = async () => {
@@ -197,6 +199,49 @@ const Portfolio = () => {
     }
   };
 
+
+  const fetchGfgData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/gfg/profile`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Extract the actual data from the nested response structure
+        const data = result.success ? result.data : result;
+        setGfgData(data);
+        console.log('GFG data fetched:', data);
+      } else if (response.status === 404) {
+        // No GFG profile found - this is normal if user hasn't added one yet
+        setGfgData(null);
+        console.log('No GFG profile found for user');
+      } else {
+        setGfgData(null);
+        console.error('Failed to fetch GFG data:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching GFG data:', error);
+      setGfgData(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
  if (loading) {
   return (
     <DashboardLayout>
@@ -206,6 +251,7 @@ const Portfolio = () => {
     </DashboardLayout>
   );
 }
+
 
 
   // No platforms connected view
@@ -337,8 +383,18 @@ const Portfolio = () => {
             <CodeforcesProfileCard codeforcesData={codeforcesData} />
           )}
 
+
+              {/* GFG Profile */}
+              {gfgData && (
+                <GfgProfileCard gfgData={gfgData} />
+              )}
+
+              {/* Awards */}
+              <AwardsCard awards={safeData.awards || []} />
+
           {/* Awards */}
           <AwardsCard awards={safeData.awards || []} />
+
 
           {/* DSA Analysis */}
           <DSAAnalysisCard dsaTopics={safeData.dsaTopics || {}} />
@@ -993,6 +1049,138 @@ const CodeforcesProfileCard = ({ codeforcesData }) => (
   </div>
 )}
 
+  </div>
+);
+
+// GFG Profile Card Component
+const GfgProfileCard = ({ gfgData }) => (
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3">
+        <img 
+          src="/src/assests/gfg-logo.png" 
+          alt="GeeksforGeeks" 
+          className="w-8 h-8"
+        />
+        <h3 className="text-xl font-bold text-gray-900">GeeksforGeeks Profile</h3>
+      </div>
+      <span className="text-sm text-gray-500">
+        Last updated: {new Date(gfgData.last_refreshed_at).toLocaleDateString()}
+      </span>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Basic Stats */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Username</span>
+          <span className="font-bold text-green-600">{gfgData.username}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Practice Problems</span>
+          <span className="font-bold text-blue-600">{gfgData.practice_problems || 0}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Coding Score</span>
+          <span className="font-bold text-purple-600">{gfgData.coding_score || 0}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Current Streak</span>
+          <span className="font-bold text-orange-600">{gfgData.streak || 0} days</span>
+        </div>
+      </div>
+
+      {/* Additional Stats */}
+      <div className="space-y-4">
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Overall Rank</span>
+          <span className="font-bold text-red-600">{gfgData.overall_rank || 'Unranked'}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Contests</span>
+          <span className="font-bold text-blue-600">{gfgData.contests_participated || 0}</span>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="font-medium text-gray-700">Total Solved</span>
+          <span className="font-bold text-green-600">{gfgData.total_solved || 0}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Enhanced Problem Difficulty Breakdown */}
+    <div className="mt-6">
+      <h4 className="text-lg font-semibold text-gray-900 mb-4">Problem Difficulty Breakdown</h4>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {/* School Level */}
+        <div className="bg-blue-50 p-3 rounded-lg text-center">
+          <div className="text-lg font-bold text-blue-600">{gfgData.school_problems || 0}</div>
+          <div className="text-xs text-gray-600">School</div>
+        </div>
+        
+        {/* Basic Level */}
+        <div className="bg-cyan-50 p-3 rounded-lg text-center">
+          <div className="text-lg font-bold text-cyan-600">{gfgData.basic_problems || 0}</div>
+          <div className="text-xs text-gray-600">Basic</div>
+        </div>
+        
+        {/* Easy Level */}
+        <div className="bg-green-50 p-3 rounded-lg text-center">
+          <div className="text-lg font-bold text-green-600">{gfgData.easy_problems || gfgData.easy_solved || 0}</div>
+          <div className="text-xs text-gray-600">Easy</div>
+        </div>
+        
+        {/* Medium Level */}
+        <div className="bg-yellow-50 p-3 rounded-lg text-center">
+          <div className="text-lg font-bold text-yellow-600">{gfgData.medium_problems || gfgData.medium_solved || 0}</div>
+          <div className="text-xs text-gray-600">Medium</div>
+        </div>
+        
+        {/* Hard Level */}
+        <div className="bg-red-50 p-3 rounded-lg text-center">
+          <div className="text-lg font-bold text-red-600">{gfgData.hard_problems || gfgData.hard_solved || 0}</div>
+          <div className="text-xs text-gray-600">Hard</div>
+        </div>
+      </div>
+    </div>
+
+    {/* Monthly Activity Breakdown */}
+    {gfgData.monthly_activity && Object.keys(gfgData.monthly_activity).length > 0 && (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Monthly Activity (Last 6 Months)</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Object.entries(gfgData.monthly_activity)
+            .slice(0, 6)
+            .map(([month, activity]) => (
+              <div key={month} className="bg-gray-100 p-3 rounded-lg text-center">
+                <div className="text-sm font-medium text-gray-700">{month}</div>
+                <div className="text-lg font-bold text-indigo-600">
+                  {activity.problems_solved || 0}
+                </div>
+                <div className="text-xs text-gray-500">Problems</div>
+                <div className="text-xs text-gray-500">
+                  {activity.active_days || 0} active days
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+    )}
+
+    {/* Activity Heatmap */}
+    {gfgData.activity_data && gfgData.activity_data.length > 0 && (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Submission Activity</h4>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <ContributionHeatmap activity={gfgData.activity_data} />
+        </div>
+      </div>
+    )}
   </div>
 );
 

@@ -4,6 +4,7 @@ import { verifyPlatform } from '../utils/platformVerification.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { createVerification, updateVerificationStatus, getVerification, getAllVerifications, deleteVerification } from '../models/PlatformVerification.js';
 import { scrapeCodeforcesProfile } from './codeforcesController.js';
+import { scrapeGfgProfile } from './gfgController.js';
 import asyncHandler from 'express-async-handler';
 import { supabaseAdmin } from '../utils/supabaseClient.js';
 
@@ -201,7 +202,7 @@ router.post('/add', protect, async (req, res) => {
             throw new Error(updateError.message);
         }
 
-        // 4. If the platform is Codeforces, trigger the scraper
+        // 4. Auto-trigger scrapers for supported platforms
         if (platform === 'codeforces') {
             console.log(`Triggering Codeforces scrape for user ${supabase_id} with handle ${handle}`);
             
@@ -211,18 +212,41 @@ router.post('/add', protect, async (req, res) => {
             const mockRes = {
                 status: (code) => mockRes,
                 json: (data) => {
-                    console.log(`Scraping for ${handle} completed`);
+                    console.log(`Codeforces scraping for ${handle} completed`);
                 }
             };
             
             // Call the scraper in the background
             scrapeCodeforcesProfile(mockReq, mockRes).catch(err => {
-                console.error(`Background scrape for ${handle} failed:`, err.message);
+                console.error(`Background Codeforces scrape for ${handle} failed:`, err.message);
             });
 
             res.status(202).json({ 
                 success: true,
                 message: `Accepted. Codeforces profile for ${handle} is being scraped.` 
+            });
+
+        } else if (platform === 'gfg') {
+            console.log(`Triggering GFG scrape for user ${supabase_id} with handle ${handle}`);
+            
+            // Create the profile URL from the handle
+            const profileUrl = `https://auth.geeksforgeeks.org/user/${handle}`;
+            const mockReq = { user: req.user, body: { profileUrl } };
+            const mockRes = {
+                status: (code) => mockRes,
+                json: (data) => {
+                    console.log(`GFG scraping for ${handle} completed`);
+                }
+            };
+            
+            // Call the scraper in the background
+            scrapeGfgProfile(mockReq, mockRes).catch(err => {
+                console.error(`Background GFG scrape for ${handle} failed:`, err.message);
+            });
+
+            res.status(202).json({ 
+                success: true,
+                message: `Accepted. GFG profile for ${handle} is being scraped.` 
             });
 
         } else {

@@ -6,6 +6,32 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 
 const MyWorkspace = () => {
+
+    const [notes, setNotes] = useState([]);
+    const [savedSheets, setSavedSheets] = useState([]);
+    const [newNote, setNewNote] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const navigate = useNavigate();
+
+	const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+    // Helper to get a valid bearer token from Supabase session (fallback to storage parsing)
+    const getAuthToken = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) return session.access_token;
+        } catch (_) {}
+        try {
+            const authDataString = localStorage.getItem('codedesk_auth');
+            if (!authDataString) return null;
+            const parsed = JSON.parse(authDataString);
+            return parsed?.currentSession?.access_token || parsed?.access_token || null;
+        } catch (_) {
+            return null;
+        }
+
   // -------------------------------
   // 1. State management
   // -------------------------------
@@ -65,6 +91,7 @@ const MyWorkspace = () => {
       } finally {
         setLoading(false);
       }
+
     };
 
     fetchWorkspaceData();
