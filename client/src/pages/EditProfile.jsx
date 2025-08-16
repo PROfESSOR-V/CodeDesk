@@ -198,7 +198,6 @@ function BasicInfo({ profile, tokenState }) {
   };
 
   return (
-
     <ContentCard>
       <SectionHeading title="Basic Info" subtitle="You can manage your essential details here." />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
@@ -274,10 +273,7 @@ function Education({ profile, tokenState }) {
   const [entries, setEntries] = useState(profile?.education || []);
 
   const addEntry = () => {
-    setEntries((prev) => [
-      ...prev,
-      { id: Date.now(), degree: "", school: "", gradeType: "CGPA", score: "", from: {}, to: {} },
-    ]);
+    setEntries((prev) => [...prev, { id: Date.now(), degree: "", school: "", gradeType: "CGPA", score: "", from: {}, to: {} }]);
   };
   const updateEntry = (id, field, value) => {
     setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, [field]: value } : e)));
@@ -341,7 +337,6 @@ function Education({ profile, tokenState }) {
           Add Education
         </button>
       </div>
-
       <button onClick={save} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
         Save
       </button>
@@ -404,7 +399,6 @@ function Achievements({ profile, tokenState }) {
           Add Achievement
         </button>
       </div>
-
       <button onClick={save} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
         Save
       </button>
@@ -467,7 +461,6 @@ function WorkExperience({ profile, tokenState }) {
           Add Experience
         </button>
       </div>
-
       <button onClick={save} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
         Save
       </button>
@@ -748,16 +741,16 @@ function VerifyModal({ code, onClose, onVerify }) {
 function Accounts({ profile, tokenState }) {
   const [username, setUsername] = useState(profile?.username || "");
   const [photoUrl, setPhotoUrl] = useState(profile?.photo_url || "");
-
-  useEffect(() => {
-    if (profile) setUsername(profile.username || "");
-  }, [profile]);
-
-  const [currPass, setCurrPass] = useState("");
-
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [photoModal, setPhotoModal] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setUsername(profile.username || "");
+      setPhotoUrl(profile.photo_url || "");
+    }
+  }, [profile]);
 
   const updateUsername = async () => {
     try {
@@ -838,12 +831,10 @@ function Accounts({ profile, tokenState }) {
             Update Password
           </button>
         </div>
-
-        {/* Photo modal */}
-        {photoModal && (
-          <VerifyModal code="Profile photo feature coming soon" onClose={() => setPhotoModal(false)} onVerify={() => {}} />
-        )}
       </div>
+      {photoModal && (
+        <VerifyModal code="Profile photo feature coming soon" onClose={() => setPhotoModal(false)} onVerify={() => {}} />
+      )}
     </ContentCard>
   );
 }
@@ -860,7 +851,3 @@ function VisibilitySection() {
     </ContentCard>
   );
 }
-
-
- 
-
