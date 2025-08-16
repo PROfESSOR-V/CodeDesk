@@ -58,6 +58,9 @@ export default function Sidebar({ open = true }) {
       case "My Workspace":
         navigate("/workspace");
         break;
+      case "Notes":
+        navigate("/notes");
+        break;
       default:
         break;
     }
