@@ -176,7 +176,7 @@ const Portfolio = () => {
     }
   };
 
-  const fetchCodeforcesData = async () => {
+const fetchCodeforcesData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
@@ -774,17 +774,17 @@ const CodeforcesProfileCard = ({ codeforcesData }) => (
           <span className="font-medium text-gray-700">Handle</span>
           <span className="font-bold text-blue-600">{codeforcesData.handle}</span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium text-gray-700">Current Rating</span>
           <span className="font-bold text-green-600">{codeforcesData.rating || 'Unrated'}</span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium text-gray-700">Max Rating</span>
           <span className="font-bold text-purple-600">{codeforcesData.max_rating || 'Unrated'}</span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium text-gray-700">Rank</span>
           <span className="font-bold text-orange-600">{codeforcesData.rank || 'Unrated'}</span>
@@ -797,19 +797,19 @@ const CodeforcesProfileCard = ({ codeforcesData }) => (
           <span className="font-medium text-gray-700">Contribution</span>
           <span className="font-bold text-blue-600">{codeforcesData.contribution || 0}</span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium text-gray-700">Friends</span>
           <span className="font-bold text-green-600">{codeforcesData.friend_of_count || 0}</span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium text-gray-700">Contests</span>
           <span className="font-bold text-purple-600">
             {codeforcesData.contest_history ? codeforcesData.contest_history.length : 0}
           </span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium text-gray-700">Problems Solved</span>
           <span className="font-bold text-orange-600">
