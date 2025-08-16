@@ -40,6 +40,7 @@ const Portfolio = () => {
   const [authEmail, setAuthEmail] = useState("");
   const [codeforcesData, setCodeforcesData] = useState(null);
   const [gfgData, setGfgData] = useState(null);
+  const [leetcodeData, setLeetcodeData] = useState(null);
 
   // Trigger GFG scraper on each page load/refresh if user has verified GFG profile
   useEffect(() => {
@@ -77,12 +78,47 @@ const Portfolio = () => {
     })();
   }, [portfolioData]);
 
+  // Trigger LeetCode scraper if verified profile present
+  useEffect(() => {
+    (async () => {
+      if (!portfolioData) return;
+      const leetPlat = (portfolioData.verifiedPlatforms || []).find(p => p.id === 'leetcode' && p.verified);
+      if (!leetPlat) return;
+
+      let username;
+      try {
+        const url = new URL(leetPlat.url.startsWith('http') ? leetPlat.url : `https://leetcode.com/${leetPlat.url}`);
+        const segs = url.pathname.split('/').filter(Boolean);
+        username = segs[segs.length - 1].replace(/\/$/, '');
+      } catch {
+        const parts = leetPlat.url.split('/').filter(Boolean);
+        username = parts[parts.length - 1];
+      }
+      if (!username) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
+
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/leetcode/scrape`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session.access_token}` },
+          body: JSON.stringify({ leetcodeUsername: username })
+        });
+        setTimeout(fetchLeetcodeData, 3000);
+      } catch (err) {
+        console.error('LeetCode auto-trigger failed:', err);
+      }
+    })();
+  }, [portfolioData]);
+
   useEffect(() => {
     // Load portfolio (may be empty) and user profile in parallel
     fetchPortfolioData();
     fetchUserProfile();
     fetchCodeforcesData();
     fetchGfgData();
+    fetchLeetcodeData();
   }, []);
 
   const fetchPortfolioData = async () => {
@@ -229,6 +265,36 @@ const Portfolio = () => {
     } catch (error) {
       console.error('Error fetching GFG data:', error);
       setGfgData(null);
+    }
+  };
+
+  const fetchLeetcodeData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/leetcode/profile`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const data = result.success ? result.data : result;
+        setLeetcodeData(data);
+        console.log('LeetCode data fetched:', data);
+      } else if (response.status === 404) {
+        setLeetcodeData(null);
+        console.log('No LeetCode profile found for user');
+      } else {
+        setLeetcodeData(null);
+        console.error('Failed to fetch LeetCode data:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching LeetCode data:', error);
+      setLeetcodeData(null);
     }
   };
 
@@ -387,6 +453,11 @@ const Portfolio = () => {
               {/* GFG Profile */}
               {gfgData && (
                 <GfgProfileCard gfgData={gfgData} />
+              )}
+
+              {/* LeetCode Profile */}
+              {leetcodeData && (
+                <LeetcodeProfileCard leetcodeData={leetcodeData} />
               )}
 
               {/* Awards */}
@@ -1178,6 +1249,66 @@ const GfgProfileCard = ({ gfgData }) => (
         <h4 className="text-lg font-semibold text-gray-900 mb-4">Submission Activity</h4>
         <div className="bg-gray-50 p-4 rounded-lg">
           <ContributionHeatmap activity={gfgData.activity_data} />
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+const LeetcodeProfileCard = ({ leetcodeData }) => (
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3">
+        <img src="/src/assests/leetcode-logo.png" alt="LeetCode" className="w-8 h-8" />
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+          LeetCode Profile
+        </h3>
+      </div>
+      <span className="text-sm text-gray-500 dark:text-gray-400">
+        Last updated: {new Date(leetcodeData.last_refreshed_at).toLocaleDateString()}
+      </span>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Basic Stats */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Username</span>
+          <span className="font-bold text-blue-600 dark:text-blue-400">{leetcodeData.username}</span>
+        </div>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Ranking</span>
+          <span className="font-bold text-green-600 dark:text-green-400">{leetcodeData.ranking || '—'}</span>
+        </div>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Total Solved</span>
+          <span className="font-bold text-purple-600 dark:text-purple-400">{leetcodeData.total_solved || 0}</span>
+        </div>
+      </div>
+
+      {/* Difficulty Breakdown */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Easy</span>
+          <span className="font-bold text-green-600 dark:text-green-400">{leetcodeData.easy_solved || 0}</span>
+        </div>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Medium</span>
+          <span className="font-bold text-yellow-600 dark:text-yellow-400">{leetcodeData.medium_solved || 0}</span>
+        </div>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Hard</span>
+          <span className="font-bold text-red-600 dark:text-red-400">{leetcodeData.hard_solved || 0}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Activity Heatmap if available */}
+    {leetcodeData.contribution_data && leetcodeData.contribution_data.length > 0 && (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Submission Activity</h4>
+        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <ContributionHeatmap activity={leetcodeData.contribution_data} />
         </div>
       </div>
     )}

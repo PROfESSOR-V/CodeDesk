@@ -11,7 +11,10 @@ import verificationRoutes from "./routes/verificationRoutes.js";
 import codeforcesRoutes from "./routes/codeforcesRoutes.js";
 import gfgRoutes from "./routes/gfgRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
+
 import notesRoutes from './routes/notesRoutes.js';
+
+import leetcodeRoutes from "./routes/leetcodeRoutes.js";
 
 
 // Removed legacy Mongo routes
@@ -68,6 +71,10 @@ app.use("/api/codeforces", codeforcesRoutes);
 app.use("/api/gfg", gfgRoutes);
 app.use("/api/workspace", workspaceRoutes); 
 app.use('/api/notes', notesRoutes);
+
+app.use("/api/workspace", workspaceRoutes);
+app.use("/api/leetcode", leetcodeRoutes);
+
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
