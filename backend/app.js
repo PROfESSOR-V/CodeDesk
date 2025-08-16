@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
 import codeforcesRoutes from "./routes/codeforcesRoutes.js";
+import gfgRoutes from "./routes/gfgRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
 import notesRoutes from './routes/notesRoutes.js';
 
@@ -64,6 +65,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/codeforces", codeforcesRoutes);
+app.use("/api/gfg", gfgRoutes);
 app.use("/api/workspace", workspaceRoutes); 
 app.use('/api/notes', notesRoutes);
 

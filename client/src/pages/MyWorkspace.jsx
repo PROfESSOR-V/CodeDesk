@@ -13,7 +13,7 @@ const MyWorkspace = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+	const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
     // Helper to get a valid bearer token from Supabase session (fallback to storage parsing)
     const getAuthToken = async () => {
@@ -57,7 +57,6 @@ const MyWorkspace = () => {
             } finally {
                 setLoading(false);
             }
-
         };
 
         fetchWorkspaceData();

@@ -741,7 +741,7 @@ function Accounts({ profile, tokenState }) {
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [photoModal, setPhotoModal] = useState(false);
-
+  const [currPass, setCurrPass] = useState("");
   useEffect(() => {
     if (profile) {
       setUsername(profile.username || "");

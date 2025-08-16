@@ -1,6 +1,6 @@
 import { FaHome, FaBriefcase, FaBook, FaRegBookmark, FaChartPie, FaClipboardList, FaPenFancy, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import BrandName from "./BrandName.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const menu = [
   { label: "Home", icon: <FaHome /> },
@@ -21,6 +21,22 @@ const menu = [
 
 export default function Sidebar({ open = true }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  /* derive active label based on pathname */
+  const path = location.pathname;
+  const activeLabel = (() => {
+    if (path.startsWith('/dashboard')) return 'Home';
+    if (path.startsWith('/portfolio')) return 'Portfolio';
+    if (path.startsWith('/workspace')) return 'My Workspace';
+    if (path.startsWith('/explore')) return 'Explore Sheets';
+    if (path.startsWith('/sheets')) return 'My Sheets';
+    if (path.startsWith('/notes')) return 'Notes';
+    if (path.startsWith('/contests')) return 'Contests';
+    if (path.startsWith('/leaderboard')) return 'Leaderboard';
+    if (path.startsWith('/form')) return 'Form';
+    return '';
+  })();
 
   const handleLogout = () => {
     // future: clear auth tokens here
@@ -71,7 +87,7 @@ export default function Sidebar({ open = true }) {
             <button
               key={idx}
               onClick={() => handleMenuClick(item.label)}
-              className={`w-full flex items-center gap-1.5 py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 ${open ? "" : "justify-center"}`}
+              className={`w-full flex items-center gap-1.5 py-2 px-3 rounded transition-colors duration-200 active:bg-gray-200 hover:bg-gray-100 ${open ? '' : 'justify-center'} ${activeLabel===item.label ? 'bg-gray-100 text-[#e67829] font-semibold' : 'text-gray-700'}`}
             >
               <span className="text-base">{item.icon}</span>
               {open && <span>{item.label}</span>}
