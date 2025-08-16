@@ -11,11 +11,12 @@ export default function Footer() {
   const sidebarPages = ["/dashboard", "/portfolio", "/workspace"];
   const needsSidebarSpacing = sidebarPages.some((p) => location.pathname.startsWith(p));
 
-  const marginClass = needsSidebarSpacing ? "md:ml-16 lg:ml-64" : "";
+  // Keep full-width footer on landing and edit-profile pages; otherwise offset for sidebar
+  const marginClass = (location.pathname === "/" || location.pathname.startsWith("/profile/edit")) ? "" : "ml-64";
 
   return (
 
-    <footer className="bg-[#e9ecef] dark:bg-gray-900 text-gray-900 dark:text-gray-200 py-8 mt-auto">
+    <footer className={`bg-[#e9ecef] text-gray-900 py-8 mt-10 transition-all duration-300 ${marginClass}`}>
 
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         

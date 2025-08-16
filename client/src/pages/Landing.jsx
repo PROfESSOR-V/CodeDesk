@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import anime from "animejs";
 import LandingNavbar from "../components/LandingNavbar.jsx";
+import Footer from "../components/Footer.jsx";
 import heroImg from "../assests/Screenshot 2025-08-02 100819.png";
 import BrandName from "../components/BrandName.jsx";
 import lcLogo from "../assests/leetcode-logo.png";
@@ -246,6 +247,9 @@ export default function Landing() {
           ))}
         </div>
       </section>
-    </div>
+
+      
+
+      </div>
   );
 }
