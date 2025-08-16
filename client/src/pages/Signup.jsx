@@ -62,7 +62,7 @@ export default function Signup() {
     }
 
     const { score } = checkPasswordStrength(password);
-    if (score < 5) { // Requires all 5 conditions to be met for a "strong" password
+    if (score < 5) {
       setError("Password does not meet all security requirements.");
       return;
     }
@@ -70,21 +70,7 @@ export default function Signup() {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Basic validation
-      if (!email.includes('@')) {
-        setError("Please enter a valid email address");
-        return;
-      }
-      
-      if (password.length < 6) {
-        setError("Password must be at least 6 characters long");
-        return;
-      }
 
-      console.log('Attempting signup with:', { email });
-      
-      // Basic signup with metadata
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -98,27 +84,17 @@ export default function Signup() {
       });
 
       if (error) {
-        console.error('Signup error:', error);
         setError(error.message);
         return;
       }
-      
-      if (!data?.user) {
-        setError('No user data received. Please try again.');
-        return;
-      }
 
-      // If signup was successful, store session
       if (data?.session?.access_token) {
         localStorage.setItem("token", data.session.access_token);
-        // Navigate to dashboard
         navigate("/dashboard");
       } else {
         setError('Please check your email to confirm your account');
       }
-
     } catch (err) {
-      console.error('Signup error:', err);
       setError(err.message || 'An error occurred during signup');
     } finally {
       setIsLoading(false);
@@ -126,36 +102,36 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Form side */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
+      <div className="flex-1 flex items-center justify-center p-8">
         <div ref={formRef} className="w-full max-w-md space-y-6">
           <h2 className="text-3xl font-bold mb-2">
             Create your <BrandName /> account
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">Full name</label>
+              <label className="block mb-1 text-sm font-medium">Full name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829]"
+                className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829] dark:bg-gray-800 dark:border-gray-700"
                 placeholder="Enter full name"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">Email address</label>
+              <label className="block mb-1 text-sm font-medium">Email address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829]"
+                className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829] dark:bg-gray-800 dark:border-gray-700"
                 placeholder="Enter email address"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">Password</label>
+              <label className="block mb-1 text-sm font-medium">Password</label>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -166,7 +142,7 @@ export default function Signup() {
                   setPasswordScore(score);
                   setPasswordRequirements(conditions);
                 }}
-                className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829]"
+                className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#e67829] dark:bg-gray-800 dark:border-gray-700"
                 placeholder="Create password"
               />
               {password && (
@@ -200,22 +176,21 @@ export default function Signup() {
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500">Already have an account?</span>
+            <span className="text-gray-500 dark:text-gray-400">Already have an account?</span>
             <Link to="/login" className="text-[#e67829] font-medium hover:underline">
               Sign in here
             </Link>
           </div>
           <div className="flex items-center gap-2 mt-4">
-            <hr className="flex-1" />
+            <hr className="flex-1 border-gray-300 dark:border-gray-700" />
             <span className="text-gray-400 text-sm">Or continue with</span>
-            <hr className="flex-1" />
+            <hr className="flex-1 border-gray-300 dark:border-gray-700" />
           </div>
-          <button className="w-full border py-2 rounded flex items-center justify-center gap-2 hover:bg-gray-50">
+          <button className="w-full border py-2 rounded flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800">
             <FcGoogle size={20} /> Sign up with Google
           </button>
-          <p className="text-xs text-center text-gray-400">
-            By signing up, you agree to our <span className="text-[#e67829]">Terms &amp; Conditions</span> and our {" "}
-            <span className="text-[#e67829]">Privacy Policy</span>.
+          <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+            By signing up, you agree to our <span className="text-[#e67829]">Terms &amp; Conditions</span> and <span className="text-[#e67829]">Privacy Policy</span>.
           </p>
         </div>
       </div>
@@ -240,4 +215,4 @@ export default function Signup() {
       </div>
     </div>
   );
-} 
+}
