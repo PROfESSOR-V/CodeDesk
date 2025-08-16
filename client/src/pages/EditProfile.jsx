@@ -610,7 +610,6 @@ function Platforms({ profile, tokenState }) {
     }
   };
 
-
   return (
     <ContentCard>
       <SectionHeading title="Platforms" subtitle="Add and verify your competitive programming profiles to get ranked." />
