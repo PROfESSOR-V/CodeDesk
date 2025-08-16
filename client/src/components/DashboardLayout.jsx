@@ -10,13 +10,20 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex">
+      {/* Sidebar */}
       <Sidebar open={sidebarOpen} />
-      <div className={`flex-1 min-h-screen bg-gray-50 transition-all duration-300 ${sidebarOpen ? "ml-0 md:ml-64" : "ml-0 md:ml-16"}`}>
+
+      {/* Main content area */}
+      <div
+        className={`flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all duration-300 ${
+          sidebarOpen ? "ml-0 md:ml-64" : "ml-0 md:ml-16"
+        }`}
+      >
         <TopBar onToggleSidebar={toggleSidebar} isSidebarOpen={sidebarOpen} />
-        <main>
-          {typeof children !== 'undefined' ? children : <Home />}
+        <main className="p-4 md:p-6">
+          {typeof children !== "undefined" ? children : <Home />}
         </main>
       </div>
     </div>
   );
-} 
+}
