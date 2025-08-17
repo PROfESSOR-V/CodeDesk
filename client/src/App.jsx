@@ -29,6 +29,7 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/workspace" element={<MyWorkspace />} /> 
           <Route path="/notes" element={<NotesPage />} />
+          <Route path="/feedback" element={<FeedbackForm />} />
         </Routes>
         <Footer />
       </Router>
