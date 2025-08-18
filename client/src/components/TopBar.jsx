@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { FaBell, FaSun, FaMoon, FaBars, FaTimes } from "react-icons/fa";
-import { supabase } from "../supabaseClient.js";
-import { useNavigate } from "react-router-dom";
 
-export default function TopBar({ onToggleSidebar, isSidebarOpen }) {
-  const navigate = useNavigate();
+export default function TopBar({ onToggleSidebar, isSidebarOpen, onLogoutClick }) {
+
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Initialize theme based on localStorage or system preference
@@ -27,12 +25,6 @@ export default function TopBar({ onToggleSidebar, isSidebarOpen }) {
       localStorage.setItem("theme", newMode ? "dark" : "light");
       return newMode;
     });
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("token");
-    navigate("/login");
   };
 
   return (
@@ -62,7 +54,7 @@ export default function TopBar({ onToggleSidebar, isSidebarOpen }) {
 
         {/* Logout */}
         <button
-          onClick={logout}
+          onClick={onLogoutClick}
           className="text-gray-600 dark:text-gray-200 hover:text-gray-800 dark:hover:text-white transition-colors"
           title="Logout"
         >
