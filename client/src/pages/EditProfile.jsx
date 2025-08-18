@@ -655,13 +655,59 @@ function Platforms({ profile, tokenState }) {
             onClick={async () => {
               try {
                 const accessToken = tokenState;
+                
+                // First save the platforms to the profiles table
                 const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
                   method: "PUT",
                   headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
                   body: JSON.stringify({ platforms: profiles }),
                 });
                 if (!res.ok) throw new Error("Failed to save platforms");
-                alert("Platforms saved successfully!");
+                
+                // Auto-trigger scrapers for platforms with usernames
+                const scrapingPromises = [];
+                
+                for (const platform of profiles) {
+                  if (platform.url && platform.url.trim()) {
+                    // Extract username from URL
+                    const username = platform.url.replace(baseUrls[platform.id], "").trim();
+                    
+                    if (username && (platform.id === 'codeforces' || platform.id === 'gfg')) {
+                      console.log(`Auto-triggering scraper for ${platform.id} with username: ${username}`);
+                      
+                      // Call the platform add endpoint which auto-triggers scraping
+                      const scrapePromise = fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/platforms/add`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+                        body: JSON.stringify({ 
+                          platform: platform.id, 
+                          handle: username 
+                        }),
+                      }).then(response => {
+                        if (response.ok) {
+                          console.log(`${platform.id} scraping initiated for ${username}`);
+                        } else {
+                          console.error(`Failed to initiate ${platform.id} scraping for ${username}`);
+                        }
+                      }).catch(err => {
+                        console.error(`Error initiating ${platform.id} scraping:`, err);
+                      });
+                      
+                      scrapingPromises.push(scrapePromise);
+                    }
+                  }
+                }
+                
+                // Wait for all scraping requests to complete (but don't block the user)
+                if (scrapingPromises.length > 0) {
+                  Promise.allSettled(scrapingPromises).then(() => {
+                    console.log("All scraping requests completed");
+                  });
+                  alert("Platforms saved successfully! Profile data is being scraped in the background.");
+                } else {
+                  alert("Platforms saved successfully!");
+                }
+                
               } catch (error) {
                 console.error('Error saving platforms:', error);
                 alert('Failed to save platforms');
@@ -669,7 +715,7 @@ function Platforms({ profile, tokenState }) {
             }}
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
           >
-            Save
+            Save Changes
           </button>
         </div>
       )}

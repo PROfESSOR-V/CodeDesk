@@ -70,19 +70,19 @@ class CodeforcesProfileScraper {
         try {
             // Get basic user info from API
             const userInfo = await this.getUserInfo(username);
-            
+
             // Get user rating history
             const ratingHistory = await this.getUserRating(username);
-            
+
             // Get user submissions
             const submissions = await this.getUserSubmissions(username);
-            
+
             // Get contest participation
             const contests = await this.getUserContests(username);
-            
+
             // Scrape additional profile data from web page
             const webData = await this.scrapeWebProfile(profileUrl);
-            
+
             // Process and aggregate the data
             const profileData = this.processProfileData({
                 userInfo,
@@ -177,11 +177,11 @@ class CodeforcesProfileScraper {
      */
     async scrapeWebProfile(profileUrl) {
         await this.initBrowser();
-        
+
         try {
             const page = await this.browser.newPage();
             await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-            
+
             await page.goto(profileUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
             const webData = await page.evaluate(() => {
@@ -237,13 +237,13 @@ class CodeforcesProfileScraper {
     processProfileData({ userInfo, ratingHistory, submissions, contests, webData, username }) {
         // Calculate submission statistics
         const submissionStats = this.calculateSubmissionStats(submissions);
-        
+
         // Calculate language statistics
         const languageStats = this.calculateLanguageStats(submissions);
-        
+
         // Calculate tag/topic statistics
         const tagStats = this.calculateTagStats(submissions);
-        
+
         // Get current and max ratings
         const currentRating = userInfo?.rating || 0;
         const maxRating = userInfo?.maxRating || 0;
@@ -255,36 +255,36 @@ class CodeforcesProfileScraper {
             username: username,
             displayName: userInfo?.firstName && userInfo?.lastName ? 
                 `${userInfo.firstName} ${userInfo.lastName}` : username,
-            
+
             // Rating info
             rating: currentRating,
             maxRating: maxRating,
             rank: rank,
             maxRank: maxRank,
-            
+
             // Additional info from API
             contribution: userInfo?.contribution || webData.contribution || 0,
             friendsCount: webData.friendsCount || 0,
             lastVisit: webData.lastVisit || '',
-            
+
             // Calculated statistics
             totalSolved: submissionStats.accepted,
             totalSubmissions: submissionStats.total,
             submissionStats: submissionStats,
             languageStats: languageStats,
             tagStats: tagStats,
-            
+
             // Contest data
             contestHistory: contests,
             totalContests: contests.length,
-            
+
             // Activity data for heatmap
             activityData: this.generateActivityData(submissions),
-            
+
             // Raw data for future processing
             ratingHistory: ratingHistory,
             recentSubmissions: submissions.slice(0, 100), // Keep last 100 submissions
-            
+
             // Metadata
             lastScrapedAt: new Date().toISOString(),
             profileUrl: `https://codeforces.com/profile/${username}`
@@ -311,7 +311,7 @@ class CodeforcesProfileScraper {
 
         submissions.forEach(submission => {
             const verdict = submission.verdict;
-            
+
             if (verdict === 'OK') {
                 stats.accepted++;
                 solvedProblems.add(`${submission.problem.contestId}-${submission.problem.index}`);
@@ -339,7 +339,7 @@ class CodeforcesProfileScraper {
      */
     calculateLanguageStats(submissions) {
         const languageCount = {};
-        
+
         submissions.forEach(submission => {
             if (submission.verdict === 'OK' && submission.programmingLanguage) {
                 const lang = submission.programmingLanguage;
@@ -355,7 +355,7 @@ class CodeforcesProfileScraper {
      */
     calculateTagStats(submissions) {
         const tagCount = {};
-        
+
         submissions.forEach(submission => {
             if (submission.verdict === 'OK' && submission.problem && submission.problem.tags) {
                 submission.problem.tags.forEach(tag => {
@@ -374,13 +374,13 @@ class CodeforcesProfileScraper {
      */
     generateActivityData(submissions) {
         const activityMap = new Map();
-        
+
         submissions.forEach(submission => {
             if (submission.creationTimeSeconds) {
                 // Convert timestamp to date string (YYYY-MM-DD)
                 const date = new Date(submission.creationTimeSeconds * 1000);
                 const dateStr = date.toISOString().split('T')[0];
-                
+
                 // Count submissions per day
                 activityMap.set(dateStr, (activityMap.get(dateStr) || 0) + 1);
             }
