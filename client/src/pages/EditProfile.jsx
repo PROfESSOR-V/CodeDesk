@@ -1,14 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { FaUser, FaImage, FaGraduationCap, FaTrophy, FaBuilding, FaCode, FaLock, FaIdBadge, FaCheckCircle, FaTrashAlt } from "react-icons/fa";
+import { FaUser, FaImage, FaGraduationCap, FaTrophy, FaBuilding, FaCode, FaLock, FaIdBadge, FaTrashAlt } from "react-icons/fa";
 import anime from "animejs";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-
-// Helper function to check authentication
-const checkAuthentication = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
-};
 
 // Reusable component for section headers
 const SectionHeading = ({ title, subtitle }) => (
@@ -198,7 +192,6 @@ function BasicInfo({ profile, tokenState }) {
   };
 
   return (
-
     <ContentCard>
       <SectionHeading title="Basic Info" subtitle="You can manage your essential details here." />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
@@ -341,7 +334,6 @@ function Education({ profile, tokenState }) {
           Add Education
         </button>
       </div>
-
       <button onClick={save} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
         Save
       </button>
@@ -404,7 +396,6 @@ function Achievements({ profile, tokenState }) {
           Add Achievement
         </button>
       </div>
-
       <button onClick={save} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
         Save
       </button>
@@ -467,7 +458,6 @@ function WorkExperience({ profile, tokenState }) {
           Add Experience
         </button>
       </div>
-
       <button onClick={save} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
         Save
       </button>
@@ -603,7 +593,7 @@ function Platforms({ profile, tokenState }) {
   };
 
   const removePlatform = async (platformId) => {
-    if (!confirm("Are you sure you want to remove this platform?")) return;
+    if (!window.confirm("Are you sure you want to remove this platform?")) return;
     try {
       const accessToken = tokenState;
       const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/platform`, {
@@ -711,7 +701,7 @@ function VerifyModal({ code, onClose, onVerify }) {
     setIsVerifying(true);
     try {
       await onVerify();
-      onClose();
+      // onClose(); // Let the parent component close the modal on success
     } catch (e) {
       console.error(e);
       alert(e.message || "Verification failed. Please try again.");
@@ -748,16 +738,16 @@ function VerifyModal({ code, onClose, onVerify }) {
 function Accounts({ profile, tokenState }) {
   const [username, setUsername] = useState(profile?.username || "");
   const [photoUrl, setPhotoUrl] = useState(profile?.photo_url || "");
-
-  useEffect(() => {
-    if (profile) setUsername(profile.username || "");
-  }, [profile]);
-
-  const [currPass, setCurrPass] = useState("");
-
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [photoModal, setPhotoModal] = useState(false);
+  const [currPass, setCurrPass] = useState("");
+  useEffect(() => {
+    if (profile) {
+      setUsername(profile.username || "");
+      setPhotoUrl(profile.photo_url || "");
+    }
+  }, [profile]);
 
   const updateUsername = async () => {
     try {
@@ -860,7 +850,3 @@ function VisibilitySection() {
     </ContentCard>
   );
 }
-
-
- 
-
