@@ -39,7 +39,7 @@ export default function FeedbackForm() {
         e.preventDefault();
         if (!validate()) return;
         const authData = JSON.parse(localStorage.getItem("codedesk_auth"));
-        if (!authData) throw Error("Login to submit feedback");
+        if (!authData) console.error("Login to submit feedback");
         try {
             setSubmitting(true);
             const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/feedback`, {
@@ -163,7 +163,7 @@ export default function FeedbackForm() {
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className="inline-flex items-center rounded-lg bg-blue-500 px-5 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 disabled:opacity-60"
+                                className="inline-flex items-center rounded-lg bg-blue-500 px-5 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 disabled:opacity-60"
                             >
                                 {submitting ? "Submitting..." : "Submit"}
                             </button>

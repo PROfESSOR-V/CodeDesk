@@ -10,7 +10,7 @@ import Footer from "./components/Footer.jsx";
 import Privacy from "./pages/Privacy";
 import MyWorkspace from "./pages/MyWorkspace.jsx";
 import NotesPage from "./pages/NotesPage";
-
+import FeedbackForm from "./pages/Feedback.jsx";
 // 🔑 import ThemeProvider + hook
 import { ThemeProvider } from "./ThemeContext";
 
