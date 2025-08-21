@@ -56,6 +56,8 @@ export default function Sidebar({ open = true, onLogoutClick }) {
         break;
       case "Notes":
         navigate("/notes");
+      case 'Form':
+        navigate('/feedback');
         break;
       default:
         break;
