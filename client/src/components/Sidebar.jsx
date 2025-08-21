@@ -34,7 +34,7 @@ export default function Sidebar({ open = true, onLogoutClick }) {
     if (path.startsWith('/notes')) return 'Notes';
     if (path.startsWith('/contests')) return 'Contests';
     if (path.startsWith('/leaderboard')) return 'Leaderboard';
-    if (path.startsWith('/form')) return 'Form';
+    if (path.startsWith('/feedback')) return 'Form';
     return '';
   })();
 
@@ -56,6 +56,7 @@ export default function Sidebar({ open = true, onLogoutClick }) {
         break;
       case "Notes":
         navigate("/notes");
+        break;
       case 'Form':
         navigate('/feedback');
         break;
