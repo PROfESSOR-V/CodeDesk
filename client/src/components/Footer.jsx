@@ -16,7 +16,7 @@ export default function Footer() {
 
   return (
 
-    <footer className={`bg-[#e9ecef] text-gray-900 py-8 mt-10 transition-all duration-300 ${marginClass}`}>
+    <footer className={`bg-[#e9ecef] background-color text-gray-900 py-8 mt-10 transition-all duration-300 ${marginClass}`}>
 
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         
