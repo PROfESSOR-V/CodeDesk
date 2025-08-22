@@ -1,3 +1,9 @@
 node_modules/
 client/node_modules/
 backend/node_modules/
+**/node_modules/
+
+# Vite cache
+client/.vite/
+backend/.vite/
+dist/

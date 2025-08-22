@@ -88,13 +88,17 @@ export default function Landing() {
           </p>
           <div ref={platformRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
             {platformLogos.map(({ src, alt }) => (
-              <img onClick={() => navigate('/signup')}
-                key={alt}
-                src={src}
-                alt={alt}
-                className="h-12 mx-auto object-contain"
-                opacity={0.7}
-              />
+              <div key={alt} className="relative group">
+                <img onClick={() => navigate('/signup')}
+                  src={src}
+                  alt={alt}
+                  className="h-12 mx-auto object-contain cursor-pointer"
+                  opacity={0.7}
+                />
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800/80 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                  {alt}
+                </div>
+              </div>
             ))}
           </div>
           {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 opacity-70">
