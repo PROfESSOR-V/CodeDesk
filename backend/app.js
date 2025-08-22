@@ -7,6 +7,13 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
+<<<<<<< HEAD
+=======
+import codeforcesRoutes from "./routes/codeforcesRoutes.js";
+import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
+
+// Removed legacy Mongo routes
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7
 
 dotenv.config();
 
@@ -53,10 +60,17 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
+app.use("/api/codeforces", codeforcesRoutes);
+app.use("/api/workspace", workspaceRoutes); 
 
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
 
 app.use(notFound);
 app.use(errorHandler);
 
+<<<<<<< HEAD
 export default app;
+=======
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7

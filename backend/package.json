@@ -6,14 +6,17 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon app.js",
+<<<<<<< HEAD
     "seed": "node seed/seedData.js",
     "start": "node app.js",
     "test": "vitest"
+=======
+    "start": "node app.js"
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7
   },
   "keywords": [
     "codedesk",
     "express",
-    "mongodb",
     "backend"
   ],
   "author": "GSSoC 2025",
