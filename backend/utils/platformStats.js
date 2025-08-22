@@ -1007,3 +1007,4 @@ export async function getPlatformStats(platformId, profileUrl) {
       throw new Error('Unsupported platform');
   }
 } 
+  export { gfgStats };
