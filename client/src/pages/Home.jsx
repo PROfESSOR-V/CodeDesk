@@ -3,6 +3,7 @@ import anime from "animejs";
 import { supabase } from "../supabaseClient";
 import DashboardCard from "../components/DashboardCard.jsx";
 import ContributionHeatmap from "../components/ContributionHeatmap";
+import CalendarCard from "../components/CalendarCard.jsx";
 
 export default function Home() {
   // -------------------------------
@@ -99,6 +100,11 @@ export default function Home() {
 
         {/* Contribution Heatmap */}
         <ContributionHeatmap activity={activity} />
+      </div>
+
+      {/* Google Calendar Integration */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <CalendarCard />
       </div>
     </div>
   );
