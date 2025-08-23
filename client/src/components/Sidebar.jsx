@@ -19,7 +19,7 @@ const menu = [
   { label: "Form", icon: <FaPenFancy /> },
 ];
 
-export default function Sidebar({ open = true }) {
+export default function Sidebar({ open = true, onLogoutClick }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,14 +34,10 @@ export default function Sidebar({ open = true }) {
     if (path.startsWith('/notes')) return 'Notes';
     if (path.startsWith('/contests')) return 'Contests';
     if (path.startsWith('/leaderboard')) return 'Leaderboard';
-    if (path.startsWith('/form')) return 'Form';
+    if (path.startsWith('/feedback')) return 'Form';
     return '';
   })();
 
-  const handleLogout = () => {
-    // future: clear auth tokens here
-    navigate("/");
-  };
 
   const widthClass = open ? "w-64" : "w-16";
   const translateClass = "translate-x-0"; // always visible
@@ -57,6 +53,12 @@ export default function Sidebar({ open = true }) {
         break;
       case "My Workspace":
         navigate("/workspace");
+        break;
+      case "Notes":
+        navigate("/notes");
+        break;
+      case 'Form':
+        navigate('/feedback');
         break;
       default:
         break;
@@ -101,7 +103,7 @@ export default function Sidebar({ open = true }) {
           <FaUserCircle className="text-base" /> {open && "Edit Profile"}
         </button>
         <button
-          onClick={handleLogout}
+          onClick={onLogoutClick}
           className={`w-full flex items-center gap-2 py-1.5 ${open ? "px-2 justify-start" : "justify-center"} rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm mt-1`}
         >
           <FaSignOutAlt className="text-base" /> {open && "Log Out"}

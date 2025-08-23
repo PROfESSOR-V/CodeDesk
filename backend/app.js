@@ -12,7 +12,7 @@ import codeforcesRoutes from "./routes/codeforcesRoutes.js";
 import gfgRoutes from "./routes/gfgRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
 import leetcodeRoutes from "./routes/leetcodeRoutes.js";
-
+import feedbackRoutes from "./routes/feedbackRoutes.js"; // 2. Import the feedback routes
 // Removed legacy Mongo routes
 
 dotenv.config();
@@ -67,6 +67,8 @@ app.use("/api/codeforces", codeforcesRoutes);
 app.use("/api/gfg", gfgRoutes);
 app.use("/api/workspace", workspaceRoutes);
 app.use("/api/leetcode", leetcodeRoutes);
+app.use("/api/feedback", feedbackRoutes); 
+
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
@@ -75,4 +77,4 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 

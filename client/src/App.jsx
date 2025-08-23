@@ -9,7 +9,8 @@ import Terms from "./pages/Terms";
 import Footer from "./components/Footer.jsx";
 import Privacy from "./pages/Privacy";
 import MyWorkspace from "./pages/MyWorkspace.jsx";
-
+import NotesPage from "./pages/NotesPage";
+import FeedbackForm from "./pages/Feedback.jsx";
 // 🔑 import ThemeProvider + hook
 import { ThemeProvider } from "./ThemeContext";
 
@@ -27,6 +28,8 @@ export default function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/workspace" element={<MyWorkspace />} /> 
+          <Route path="/notes" element={<NotesPage />} />
+          <Route path="/feedback" element={<FeedbackForm />} />
         </Routes>
         <Footer />
       </Router>
