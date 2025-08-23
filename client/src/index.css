@@ -1,6 +1,6 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; 
 
 /* LeetCode Heatmap Styles */
 .leetcode-heatmap {
@@ -104,4 +104,11 @@
     color: #1f2937;
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
+}
+
+.dark .background-color {
+    background-color: rgb(31, 41, 55);
+    color: white;
+    margin: 0px;
+    padding-top: 4.5rem;
 }
