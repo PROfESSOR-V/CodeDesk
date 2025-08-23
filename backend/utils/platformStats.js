@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import puppeteer from "puppeteer";
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
@@ -13,182 +14,283 @@ async function leetCodeStats(profileUrl) {
   if (username === "u") username = parts.pop();
   username = username.toLowerCase();
 
-  // Get comprehensive user data
-  const query = {
-    operationName: "userProfile",
-    query: `
-      query userProfile($username: String!) {
-        matchedUser(username: $username) {
-          username
-          profile { 
-            realName 
-            ranking 
-            userAvatar
-            aboutMe
-            school
-            websites
-            countryName
-            company
-            jobTitle
-          }
-          submitStats: submitStatsGlobal {
-            acSubmissionNum { difficulty count }
-            totalSubmissionNum { difficulty count }
-          }
-          userCalendar {
-            activeYears
-            streak
-            totalActiveDays
-            submissionCalendar
-          }
-          userContestRanking {
-            attendedContestsCount
-            rating
-            globalRanking
-            totalParticipants
-            topPercentage
-          }
-        }
-      }`,
-    variables: { username },
-  };
-
+  const browser = await puppeteer.launch({ 
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  
   try {
-    const { data } = await axios.post("https://leetcode.com/graphql", query, {
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": UA,
-        Referer: `https://leetcode.com/${username}`,
-      },
-    });
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    
+    const url = `https://leetcode.com/u/${username}/`;
+    console.log(`Attempting to scrape LeetCode profile: ${url}`);
+    
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-    const u = data.data.matchedUser;
-    if (!u) throw new Error("User not found on LeetCode");
-
-    // Process difficulty breakdown
-    const difficulties = { easy: 0, medium: 0, hard: 0 };
-    u.submitStats.acSubmissionNum.forEach(item => {
-      if (item.difficulty === "Easy") difficulties.easy = item.count;
-      else if (item.difficulty === "Medium") difficulties.medium = item.count;
-      else if (item.difficulty === "Hard") difficulties.hard = item.count;
-    });
-
-    const totalSolved = difficulties.easy + difficulties.medium + difficulties.hard;
-
-    // Generate contribution calendar HTML (simplified version)
-    let contributionGraphHtml = '';
-    let contributionDataArr = [];
-    if (u.userCalendar?.submissionCalendar) {
-      const calendar = JSON.parse(u.userCalendar.submissionCalendar);
-      contributionGraphHtml = generateLeetCodeCalendarSVG(calendar, u.userCalendar.streak, totalSolved);
-      // Build contributionData array [{date,count}]
-      contributionDataArr = Object.entries(calendar).map(([ts, cnt]) => {
-        const date = new Date(parseInt(ts, 10) * 1000).toISOString().slice(0, 10);
-        return { date, count: cnt };
-      });
-    }
-
-    return {
-      platform: "leetcode",
-      username: u.username,
-      displayName: u.profile.realName || (u.profile.aboutMe ? u.profile.aboutMe.slice(0, 120) : '') || u.username,
-      ranking: u.profile.ranking,
-      totalSolved,
-      easySolved: difficulties.easy,
-      mediumSolved: difficulties.medium,
-      hardSolved: difficulties.hard,
-      activeDays: u.userCalendar?.totalActiveDays || 0,
-      currentStreak: u.userCalendar?.streak || 0,
-      contestsParticipated: u.userContestRanking?.attendedContestsCount || 0,
-      contestRating: u.userContestRanking?.rating || 0,
-      maxRating: u.userContestRanking?.rating || 0,
-      contributionGraphHtml,
-      contributionData: contributionDataArr || [],
-      country: u.profile.countryName,
-    };
-  } catch (error) {
-    console.error("LeetCode API error:", error);
-    // Fallback to HTML scraping when GraphQL fails (e.g., Cloudflare blocks)
+    // Wait for elements to load
     try {
-      const puppeteer = await import("puppeteer");
-      const browser = await puppeteer.launch({ 
-        headless: "new", 
-        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-accelerated-2d-canvas"]
-      });
-      const page = await browser.newPage();
-      await page.setUserAgent(UA);
-      await page.setViewport({ width: 1366, height: 768 });
-      await page.goto(`https://leetcode.com/${username}`, { waitUntil: "domcontentloaded", timeout: 60000 });
-      await new Promise(res => setTimeout(res, 2000)); // Wait for JS render
-
-      const pageContent = await page.content();
-      await browser.close();
-
-      // Extract with Cheerio for reliability
-      const $ = cheerio.load(pageContent);
-
-      // Find submissionCalendar JSON
-      let submissionCalendarObj = {};
-      let difficulties = { easy: 0, medium: 0, hard: 0 };
-      let streak = 0;
-      let activeDays = 0;
-
-      // Look for script tags with data
-      $('script').each((i, elem) => {
-        const text = $(elem).html() || '';
-        if (text.includes('submissionCalendar')) {
-          const calMatch = text.match(/submissionCalendar:\s*"([^"]+)"/);
-          if (calMatch) submissionCalendarObj = JSON.parse(calMatch[1]);
-
-          const subStatsMatch = text.match(/acSubmissionNum:\s*(\[[^\]]+\])/);
-          if (subStatsMatch) {
-            const arr = JSON.parse(subStatsMatch[1]);
-            arr.forEach(it => {
-              if (it.difficulty === "Easy") difficulties.easy = it.count;
-              else if (it.difficulty === "Medium") difficulties.medium = it.count;
-              else if (it.difficulty === "Hard") difficulties.hard = it.count;
-            });
-          }
-
-          const streakMatch = text.match(/streak:\s*(\d+)/);
-          if (streakMatch) streak = parseInt(streakMatch[1]);
-
-          const activeMatch = text.match(/totalActiveDays:\s*(\d+)/);
-          if (activeMatch) activeDays = parseInt(activeMatch[1]);
-        }
-      });
-
-      const totalSolved = difficulties.easy + difficulties.medium + difficulties.hard;
-
-      const contributionDataArr = Object.entries(submissionCalendarObj).map(([ts, cnt]) => ({
-        date: new Date(parseInt(ts) * 1000).toISOString().slice(0,10),
-        count: cnt
-      }));
-
-      const contributionGraphHtml = generateLeetCodeCalendarSVG(submissionCalendarObj, streak, totalSolved);
-
-      return {
-        platform: "leetcode",
-        username,
-        displayName: username,
-        ranking: null,
-        totalSolved,
-        easySolved: difficulties.easy,
-        mediumSolved: difficulties.medium,
-        hardSolved: difficulties.hard,
-        activeDays,
-        currentStreak: streak,
-        contestsParticipated: 0,
-        contestRating: 0,
-        maxRating: 0,
-        contributionGraphHtml,
-        contributionData: contributionDataArr,
-        country: null,
-      };
-    } catch (scrapeErr) {
-      console.error("LeetCode scrape fallback failed:", scrapeErr.message);
-      throw error; // propagate original
+      await page.waitForSelector('div, span', { timeout: 10000 });
+      console.log('Basic elements loaded');
+    } catch (e) {
+      console.log('Basic elements not found, proceeding anyway');
     }
+
+    // Extract data from the actual LeetCode profile page
+    const extractedData = await page.evaluate(() => {
+      try {
+        console.log('=== STARTING LEETCODE PROFILE EXTRACTION ===');
+        
+        // Check if profile exists - less strict check
+        const bodyText = document.body.innerText.toLowerCase();
+        const hasErrorKeywords = bodyText.includes('user not found') ||
+                               bodyText.includes('that user does not exist') ||
+                               bodyText.includes('page not found') ||
+                               (bodyText.includes('404') && bodyText.length < 100);
+
+        // Also check for positive indicators that this is a valid LeetCode profile
+        const hasLeetCodeElements = bodyText.includes('leetcode') ||
+                                  bodyText.includes('easy') ||
+                                  bodyText.includes('medium') ||
+                                  bodyText.includes('hard') ||
+                                  document.querySelector('svg') !== null;
+
+        console.log('Body text sample:', bodyText.substring(0, 200));
+        console.log('Has error keywords:', hasErrorKeywords);
+        console.log('Has LeetCode elements:', hasLeetCodeElements);
+
+        // Only throw error if we have clear error indicators AND no positive indicators
+        if (hasErrorKeywords && !hasLeetCodeElements) {
+          throw new Error('Profile not found or does not exist');
+        }
+
+        // Initialize results
+        let difficulties = { easy: 0, medium: 0, hard: 0 };
+        let totalSolved = 0;
+        let ranking = null;
+        let heatmapSvg = null;
+
+        // Extract difficulty counts from the specific UI pattern
+        // Looking for the pattern: "92/890", "74/1904", "7/862" with Easy/Med./Hard labels
+        const allElements = document.querySelectorAll('*');
+        
+        console.log('Searching for difficulty statistics...');
+        
+        allElements.forEach(element => {
+          const text = element.textContent?.trim() || '';
+          
+          // Match the pattern "number/number"
+          if (/^\d+\/\d+$/.test(text)) {
+            const [solved, total] = text.split('/').map(Number);
+            
+            // Get the parent container to find difficulty indicators
+            let parent = element.parentElement;
+            let foundDifficulty = false;
+            
+            // Check multiple levels up to find difficulty context
+            for (let i = 0; i < 5 && parent && !foundDifficulty; i++) {
+              const siblings = Array.from(parent.children);
+              
+              siblings.forEach(sibling => {
+                const siblingText = sibling.textContent?.toLowerCase() || '';
+                
+                if (siblingText.includes('easy') && !foundDifficulty) {
+                  difficulties.easy = solved;
+                  console.log(`Found Easy: ${solved}/${total}`);
+                  foundDifficulty = true;
+                } else if (siblingText.includes('med') && !foundDifficulty) {
+                  difficulties.medium = solved;
+                  console.log(`Found Medium: ${solved}/${total}`);
+                  foundDifficulty = true;
+                } else if (siblingText.includes('hard') && !foundDifficulty) {
+                  difficulties.hard = solved;
+                  console.log(`Found Hard: ${solved}/${total}`);
+                  foundDifficulty = true;
+                }
+              });
+              
+              parent = parent.parentElement;
+            }
+          }
+        });
+
+        // Extract total solved count from the circular progress indicator
+        // Looking for the large number like "173" in the center
+        const totalElements = document.querySelectorAll('span');
+        totalElements.forEach(element => {
+          const text = element.textContent?.trim() || '';
+          
+          // Look for elements with large font size containing just a number
+          const computedStyle = window.getComputedStyle(element);
+          const fontSize = computedStyle.fontSize;
+          
+          if (fontSize && fontSize.includes('30px') && /^\d{1,4}$/.test(text)) {
+            const number = parseInt(text);
+            if (number > 0 && number <= 4000) {
+              totalSolved = number;
+              console.log(`Found total solved: ${totalSolved}`);
+            }
+          }
+        });
+
+        // Fallback: calculate total from difficulties if not found or if it seems incorrect
+        const calculatedTotal = difficulties.easy + difficulties.medium + difficulties.hard;
+        if (totalSolved === 0 || Math.abs(totalSolved - calculatedTotal) > 50) {
+          totalSolved = calculatedTotal;
+          console.log(`Using calculated total from difficulties: ${totalSolved}`);
+        }
+
+        // Extract rank information and contest rating
+        let contestRating = 0;
+        allElements.forEach(element => {
+          const text = element.textContent?.trim() || '';
+          
+          // Look for rank patterns like "Rank 763,290"
+          const rankMatch = text.match(/rank\s*(\d{1,3},?\d{3})/i);
+          if (rankMatch) {
+            ranking = parseInt(rankMatch[1].replace(',', ''));
+            console.log(`Found ranking: ${ranking}`);
+          }
+          
+          // Look for contest rating patterns
+          const ratingMatch = text.match(/rating[:\s]*(\d{3,4})/i);
+          if (ratingMatch) {
+            contestRating = parseInt(ratingMatch[1]);
+            console.log(`Found contest rating: ${contestRating}`);
+          }
+        });
+
+        // Extract badges
+        const badges = [];
+        allElements.forEach(element => {
+          const text = element.textContent?.trim() || '';
+          const className = String(element.className || '');
+          
+          // Look for badge-like elements
+          if (className.includes('badge') || className.includes('award') || className.includes('achievement')) {
+            if (text && text.length > 0 && text.length < 50 && !text.includes('|') && !text.includes('/')) {
+              badges.push(text);
+              console.log(`Found badge: ${text}`);
+            }
+          }
+        });
+
+        // Extract heatmap SVG
+        console.log('Searching for heatmap SVG...');
+        const svgElements = document.querySelectorAll('svg');
+        
+        svgElements.forEach((svg, index) => {
+          const viewBox = svg.getAttribute('viewBox');
+          const width = svg.getAttribute('width');
+          const rects = svg.querySelectorAll('rect');
+          
+          // The heatmap SVG has specific characteristics
+          if (viewBox && viewBox.includes('764.74') && viewBox.includes('104.64')) {
+            heatmapSvg = svg.outerHTML;
+            console.log(`Found heatmap SVG by viewBox with ${rects.length} squares`);
+          } else if (rects.length > 100) {
+            // Alternative: large number of rectangles (calendar squares)
+            heatmapSvg = svg.outerHTML;
+            console.log(`Found heatmap SVG by rect count (${rects.length} squares)`);
+          }
+        });
+
+        const finalResults = {
+          difficulties,
+          totalSolved,
+          ranking,
+          contestRating,
+          badges,
+          heatmapSvg,
+          profileExists: true
+        };
+
+        console.log('=== EXTRACTION RESULTS ===', finalResults);
+        return finalResults;
+
+      } catch (error) {
+        console.log('Error in LeetCode extraction:', error.message);
+        console.log('Error stack:', error.stack);
+        return {
+          difficulties: { easy: 0, medium: 0, hard: 0 },
+          totalSolved: 0,
+          ranking: null,
+          contestRating: 0,
+          badges: [],
+          heatmapSvg: null,
+          profileExists: false,
+          error: error.message
+        };
+      }
+    });
+
+    await browser.close();
+
+    console.log(`LeetCode extraction completed for ${username}:`, extractedData);
+
+    if (!extractedData.profileExists && extractedData.totalSolved === 0 && extractedData.difficulties.easy === 0 && extractedData.difficulties.medium === 0 && extractedData.difficulties.hard === 0) {
+      throw new Error(`LeetCode profile for ${username} does not exist or is not accessible`);
+    }
+
+    // Generate heatmap if extracted, otherwise create fallback
+    let contributionGraphHtml = extractedData.heatmapSvg;
+    if (!contributionGraphHtml) {
+      console.log('No heatmap found, generating fallback...');
+      contributionGraphHtml = generateLeetCodeCalendarSVG({}, 0, extractedData.totalSolved);
+    }
+
+    // Calculate rating from ranking if no contest rating found
+    let finalContestRating = extractedData.contestRating;
+    if (!finalContestRating && extractedData.ranking) {
+      finalContestRating = Math.max(0, 3000 - Math.floor(extractedData.ranking / 1000));
+    }
+
+    // Return data structure that matches what the controller expects
+    const result = {
+      platform: "leetcode",
+      username,
+      displayName: username,
+      
+      // Main stats - using correct field names for the database
+      totalSolved: extractedData.totalSolved,
+      easySolved: extractedData.difficulties.easy,
+      mediumSolved: extractedData.difficulties.medium,
+      hardSolved: extractedData.difficulties.hard,
+      
+      // Contest and ranking info
+      contestRating: finalContestRating,
+      contestsParticipated: 0, // LeetCode doesn't easily provide this
+      ranking: extractedData.ranking,
+      
+      // Activity data
+      activeDays: 0,
+      currentStreak: 0,
+      
+      // Heatmap and contribution data
+      contributionGraphHtml,
+      contributionData: [],
+      
+      // Additional fields
+      country: null,
+      badges: extractedData.badges || []
+    };
+
+    console.log(`Successfully scraped LeetCode profile for ${username}:`, {
+      totalSolved: result.totalSolved,
+      easy: result.easySolved,
+      medium: result.mediumSolved,
+      hard: result.hardSolved,
+      rating: result.contestRating,
+      ranking: result.ranking,
+      hasHeatmap: !!contributionGraphHtml
+    });
+
+    return result;
+
+  } catch (scrapeErr) {
+    await browser.close();
+    console.error(`LeetCode scrape failed for ${username}:`, scrapeErr.message);
+    throw new Error(`Failed to scrape LeetCode profile for ${username}: ${scrapeErr.message}`);
   }
 }
 
@@ -999,11 +1101,9 @@ export async function getPlatformStats(platformId, profileUrl) {
       return await codeforcesStats(profileUrl);
     case 'gfg':
       return await gfgStats(profileUrl);
-    case 'codechef':
-      return await codechefStats(profileUrl);
     case 'hackerrank':
       return await hackerRankStats(profileUrl);
     default:
-      throw new Error('Unsupported platform');
+      throw new Error(`Unsupported platform: ${platformId}`);
   }
-} 
+}
