@@ -12,13 +12,6 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.42.4",
     "animejs": "^3.2.1",
-    "axios": "^1.11.0",
-    "lucide-react": "^0.539.0",
-    "react": "^18.2.0",
-    "react-calendar-heatmap": "^1.8.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^4.10.1",
-    "react-router-dom": "^6.19.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.8.0",
