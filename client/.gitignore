@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 .env.test
+=======
+
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1
 .env
+.env.test
 node_modules/

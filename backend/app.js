@@ -8,12 +8,20 @@ import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1
 import codeforcesRoutes from "./routes/codeforcesRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
 
 // Removed legacy Mongo routes
+<<<<<<< HEAD
 =======
 >>>>>>> 8ad8ffc2 (Add automated tests and test results)
+=======
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1
 
 dotenv.config();
 
@@ -69,8 +77,16 @@ app.use(notFound);
 app.use(errorHandler);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 =======
 export default app;
 >>>>>>> 8ad8ffc2 (Add automated tests and test results)
+=======
+export default app;
+=======
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1

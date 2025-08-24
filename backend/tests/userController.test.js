@@ -2,6 +2,7 @@ import request from 'supertest';
 import { describe, it, expect } from 'vitest';
 import app from '../app.js';
 
+<<<<<<< HEAD
 describe("POST /api/syncUser", () => {
   it("should return 400 if supabaseId is missing", async () => {
     const res = await request(app)
@@ -27,3 +28,14 @@ describe("POST /api/syncUser", () => {
     expect(res.body).toHaveProperty("user");
   });
 });
+=======
+describe('User Controller', () => {
+  it('should return 400 for missing supabaseId or email', async () => {
+    const res = await request(app)
+      .post('/api/users/sync')
+      .send({});
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toMatch(/Missing supabaseId or email/);
+  });
+});
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1

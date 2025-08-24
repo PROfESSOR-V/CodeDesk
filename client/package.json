@@ -11,8 +11,15 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.42.4",
     "animejs": "^3.2.1",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1
     "axios": "^1.11.0",
     "lucide-react": "^0.539.0",
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7
     "react": "^18.2.0",
     "react-calendar-heatmap": "^1.8.0",
     "react-dom": "^18.2.0",
@@ -32,7 +39,16 @@
     "jsdom": "^26.1.0",
     "postcss": "^8.4.24",
     "tailwindcss": "^3.4.1",
+<<<<<<< HEAD
     "vite": "^7.1.2",
     "vitest": "^3.2.4"
+=======
+<<<<<<< HEAD
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4"
+=======
+    "vite": "^7.1.2"
+>>>>>>> dbce48a6aae17253276326def391edd19386f7b7
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1
   }
 }

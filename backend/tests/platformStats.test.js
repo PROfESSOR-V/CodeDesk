@@ -80,6 +80,7 @@ describe('GeeksForGeeks Stats Utility (JS)', () => {
     await expect(gfgStatsError('not-a-url')).rejects.toThrow('Invalid URL');
   });
 });
+<<<<<<< HEAD
 
 describe('platformStats Utility', () => {
   it('should return stats object for valid input', () => {
@@ -102,3 +103,5 @@ describe('platformStats Utility', () => {
     expect(stats.attempted).toBe(0);
   });
 });
+=======
+>>>>>>> 5171b9b3d2aae810099f682150361130f8270af1
