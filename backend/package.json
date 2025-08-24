@@ -1,0 +1,37 @@
+{
+  "name": "codedesk-backend",
+  "version": "1.0.0",
+  "description": "Backend boilerplate for CodeDesk platform",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "codedesk",
+    "express",
+    "backend"
+  ],
+  "author": "GSSoC 2025",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.42.4",
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-async-handler": "^1.2.0",
+    "mongoose": "^8.17.1",
+    "puppeteer": "^22.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.34.0",
+    "jest": "^30.0.5",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
+  }
+}
