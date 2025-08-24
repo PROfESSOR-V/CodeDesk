@@ -80,3 +80,25 @@ describe('GeeksForGeeks Stats Utility (JS)', () => {
     await expect(gfgStatsError('not-a-url')).rejects.toThrow('Invalid URL');
   });
 });
+
+describe('platformStats Utility', () => {
+  it('should return stats object for valid input', () => {
+    const input = { solved: 10, attempted: 15 };
+    const stats = platformStats(input);
+    expect(stats).toBeDefined();
+    expect(stats.solved).toBe(10);
+    expect(stats.attempted).toBe(15);
+  });
+
+  it('should handle missing input gracefully', () => {
+    const stats = platformStats();
+    expect(stats).toBeDefined();
+  });
+
+  it('should handle edge cases', () => {
+    const input = { solved: 0, attempted: 0 };
+    const stats = platformStats(input);
+    expect(stats.solved).toBe(0);
+    expect(stats.attempted).toBe(0);
+  });
+});

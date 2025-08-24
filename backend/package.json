@@ -6,12 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon app.js",
-
-    "start": "node app.js"
-=======
     "seed": "node seed/seedData.js",
     "start": "node app.js",
-    "test": "vitest"tomated tests and test results)
+    "test": "jest"
   },
   "keywords": [
     "codedesk",
