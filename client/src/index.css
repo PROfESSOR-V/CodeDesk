@@ -2,11 +2,113 @@
 @tailwind components;
 @tailwind utilities; 
 
+/* LeetCode Heatmap Styles */
+.leetcode-heatmap {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+}
+
+.leetcode-heatmap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.leetcode-heatmap rect {
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.leetcode-heatmap rect:hover {
+  opacity: 0.8;
+  stroke: #333;
+  stroke-width: 1;
+}
+
+/* LeetCode specific color variables - more comprehensive coverage */
+.leetcode-heatmap rect[fill*="--green-20"],
+.leetcode-heatmap rect[fill="var(--green-20)"] {
+  fill: #c6e48b !important;
+}
+
+.leetcode-heatmap rect[fill*="--green-40"],
+.leetcode-heatmap rect[fill="var(--green-40)"] {
+  fill: #7bc96f !important;
+}
+
+.leetcode-heatmap rect[fill*="--green-60"],
+.leetcode-heatmap rect[fill="var(--green-60)"] {
+  fill: #239a3b !important;
+}
+
+.leetcode-heatmap rect[fill*="--green-80"],
+.leetcode-heatmap rect[fill="var(--green-80)"] {
+  fill: #196127 !important;
+}
+
+/* Handle transparent and empty fills */
+.leetcode-heatmap rect[fill="transparent"],
+.leetcode-heatmap rect[fill=""],
+.leetcode-heatmap rect:not([fill]) {
+  fill: #ebedf0 !important;
+}
+
+/* Force override any black or dark fills to grey for inactive days */
+.leetcode-heatmap rect[fill="#000000"],
+.leetcode-heatmap rect[fill="#000"],
+.leetcode-heatmap rect[fill="black"],
+.leetcode-heatmap rect[fill="#161b22"] {
+  fill: #ebedf0 !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .leetcode-heatmap rect {
+    outline: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .leetcode-heatmap rect:hover {
+    stroke: #fff;
+  }
+  
+  .leetcode-heatmap rect[fill="transparent"],
+  .leetcode-heatmap rect[fill=""],
+  .leetcode-heatmap rect:not([fill]),
+  .leetcode-heatmap rect[fill="#000000"],
+  .leetcode-heatmap rect[fill="#000"],
+  .leetcode-heatmap rect[fill="black"],
+  .leetcode-heatmap rect[fill="#161b22"] {
+    fill: #2d333b !important;
+  }
+}
+
+/* Tooltip styles for heatmap */
+.leetcode-heatmap-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .leetcode-heatmap-tooltip {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1f2937;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}
+
 .dark .background-color {
     background-color: rgb(31, 41, 55);
     color: white;
     margin: 0px;
     padding-top: 4.5rem;
 }
-
-
