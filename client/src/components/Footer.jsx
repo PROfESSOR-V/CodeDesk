@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram,FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import BrandName from "./BrandName.jsx";
 
@@ -76,6 +76,9 @@ export default function Footer() {
             </a>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#e67829]">
               <FaInstagram />
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#e67829]">
+              <FaFacebook />
             </a>
           </div>
         </div>
