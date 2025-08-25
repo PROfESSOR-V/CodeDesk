@@ -1,3 +1,4 @@
+
 node_modules/
 client/node_modules/
 backend/node_modules/
@@ -7,3 +8,9 @@ backend/node_modules/
 client/.vite/
 backend/.vite/
 dist/
+
+
+node_modules/
+client/node_modules/
+backend/node_modules/
+
