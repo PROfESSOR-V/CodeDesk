@@ -1,7 +1,7 @@
-
 node_modules/
 client/node_modules/
 backend/node_modules/
+<<<<<<< HEAD
 **/node_modules/
 
 # Vite cache
@@ -14,3 +14,7 @@ node_modules/
 client/node_modules/
 backend/node_modules/
 
+=======
+.vite/
+dist/
+>>>>>>> 9e6717e (Update gitignore to exclude node_modules and build artifacts)
