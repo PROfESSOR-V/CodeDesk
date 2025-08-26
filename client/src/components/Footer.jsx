@@ -49,12 +49,12 @@ export default function Footer() {
           <h3 className="text-lg font-semibold mb-3">Legal</h3>
           <ul className="space-y-2">
             <li>
-              <button onClick={() => navigate("/terms")} className="hover:text-[#e67829]">
+              <button onClick={() => {navigate("/terms");window.scrollTo(0,0)}} className="hover:text-[#e67829]">
                 Terms & Conditions
               </button>
             </li>
             <li>
-              <button onClick={() => navigate("/privacy")} className="hover:text-[#e67829]">
+              <button onClick={() => {navigate("/privacy") ;window.scrollTo(0,0)}} className="hover:text-[#e67829]">
                 Privacy Policy
               </button>
             </li>
