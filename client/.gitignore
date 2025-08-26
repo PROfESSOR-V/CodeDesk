@@ -2,5 +2,10 @@
 
 node_modules/
 
+
 node_modules/
+
+
+.vite/
+dist/
 
