@@ -1,3 +1,4 @@
+import React from "react";
 import LandingNavbar from "../components/LandingNavbar.jsx";
 import heroImg from "../assests/Screenshot 2025-08-02 100819.png";
 import BrandName from "../components/BrandName.jsx";
