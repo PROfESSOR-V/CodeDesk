@@ -1,50 +1,46 @@
+
+
 import { Router } from 'express';
 import {
   scrapeProfile,
   getProfile,
   getQuickProfile,
-  getProfileStats,
-  scrapeRateLimit,
+  getHeatmap,
   healthCheck,
-  testScraper
+  scrapeRateLimit,
+  refreshRateLimit,
+  refreshProfile,
+  getActivities,
+  refreshAllProfiles
 } from '../controllers/codechefController.js';
 
 const CodeChefRouter = Router();
 
-// Main scraping endpoint
-CodeChefRouter.post('/scrape', scrapeRateLimit, scrapeProfile);
-
-// Get profile data (database integration pending)
-CodeChefRouter.get('/profile/:username', getProfile);
-
-// Quick profile data (direct scrape)
-CodeChefRouter.get('/profile/:username/quick', scrapeRateLimit, getQuickProfile);
-
-// Get profile statistics
-CodeChefRouter.get('/profile/:username/stats', scrapeRateLimit, getProfileStats);
-
-// Health check for Selenium WebDriver
+// Health check endpoint
 CodeChefRouter.get('/health', healthCheck);
 
-// Test scraper functionality
-CodeChefRouter.get('/test', testScraper);
+// Profile scraping endpoint with rate limiting
+CodeChefRouter.post('/scrape', scrapeRateLimit, scrapeProfile);
 
-// Simple status endpoint
-CodeChefRouter.get('/status', (req, res) => {
-  res.json({
-    status: 'OK',
-    service: 'CodeChef Profile Scraper',
-    scrapeMethod: 'Selenium WebDriver',
-    timestamp: new Date().toISOString(),
-    availableEndpoints: [
-      'POST /scrape - Scrape and save profile',
-      'GET /profile/:username - Get stored profile (pending DB)',
-      'GET /profile/:username/quick - Get fresh profile data',
-      'GET /profile/:username/stats - Get profile statistics', 
-      'GET /health - Service health check',
-      'GET /test - Test scraper functionality',
-      'GET /status - Service status'
-    ]
+// Profile data retrieval endpoints
+CodeChefRouter.get('/profile/:username', getProfile);
+CodeChefRouter.get('/profile/:username/quick', getQuickProfile);
+CodeChefRouter.get('/profile/:username/heatmap', getHeatmap);
+CodeChefRouter.get('/profile/:username/activities', getActivities);
+
+//refresh endpoint
+CodeChefRouter.post('/profile/:username/refresh', refreshRateLimit , refreshProfile)
+
+// Refresh all profiles endpoint
+CodeChefRouter.post('/refresh-all', refreshAllProfiles);
+
+// Error handling middleware
+CodeChefRouter.use((err, req, res, next) => {
+  console.error('Router Error:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message,
+    timestamp: new Date().toISOString()
   });
 });
 
