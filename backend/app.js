@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 // Mongo connection removed
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import { startDailyRefresh } from "./utils/scheduler.js";
 
 // Route files
 import userRoutes from "./routes/userRoutes.js";
@@ -73,4 +74,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  startDailyRefresh();
+});
