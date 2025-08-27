@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
 import codeforcesRoutes from "./routes/codeforcesRoutes.js";
+import CodeChefRouter from "./routes/codechefRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
 
 // Removed legacy Mongo routes
@@ -63,6 +64,7 @@ app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/codeforces", codeforcesRoutes);
 app.use("/api/workspace", workspaceRoutes); 
+app.use("/api/codechef" , CodeChefRouter)
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));

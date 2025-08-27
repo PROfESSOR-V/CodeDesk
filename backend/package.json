@@ -23,7 +23,10 @@
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
-    "puppeteer": "^22.5.0"
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
+    "puppeteer": "^22.5.0",
+    "selenium-webdriver": "^4.35.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
