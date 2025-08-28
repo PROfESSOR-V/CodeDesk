@@ -3,6 +3,10 @@ const router = express.Router();
 import { verifyPlatform } from '../utils/platformVerification.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { createVerification, updateVerificationStatus, getVerification, getAllVerifications, deleteVerification } from '../models/PlatformVerification.js';
+import { scrapeCodeforcesProfile } from './codeforcesController.js';
+import { scrapeGfgProfile } from './gfgController.js';
+import asyncHandler from 'express-async-handler';
+import { supabaseAdmin } from '../utils/supabaseClient.js';
 
 // @desc    Initialize platform verification
 // @route   POST /api/platforms/init-verify
@@ -145,6 +149,119 @@ router.post('/verify-platform', protect, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error verifying platform profile. Please try again.',
+            error: error.message
+        });
+    }
+});
+
+// @desc    Add a platform handle to a user's profile
+// @route   POST /api/platforms/add
+// @access  Private
+router.post('/add', protect, async (req, res) => {
+    try {
+        const { platform, handle } = req.body;
+        const supabase_id = req.user.id;
+
+        if (!platform || !handle) {
+            return res.status(400).json({
+                success: false,
+                message: "Platform and handle are required"
+            });
+        }
+
+        // 1. Fetch the current profile
+        const { data: profile, error: fetchError } = await supabaseAdmin
+            .from("profiles")
+            .select("platforms")
+            .eq("supabase_id", supabase_id)
+            .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') { // pgrst116 = no rows found
+            throw new Error(fetchError.message);
+        }
+
+        // 2. Add or update the platform handle
+        const existingPlatforms = profile?.platforms || [];
+        const platformIndex = existingPlatforms.findIndex(p => p.id === platform);
+
+        if (platformIndex > -1) {
+            // Update existing handle
+            existingPlatforms[platformIndex].handle = handle;
+        } else {
+            // Add new platform
+            existingPlatforms.push({ id: platform, handle });
+        }
+
+        // 3. Save the updated platforms array back to the profile
+        const { error: updateError } = await supabaseAdmin
+            .from("profiles")
+            .update({ platforms: existingPlatforms })
+            .eq("supabase_id", supabase_id);
+
+        if (updateError) {
+            throw new Error(updateError.message);
+        }
+
+        // 4. Auto-trigger scrapers for supported platforms
+        if (platform === 'codeforces') {
+            console.log(`Triggering Codeforces scrape for user ${supabase_id} with handle ${handle}`);
+            
+            // Create the profile URL from the handle
+            const profileUrl = `https://codeforces.com/profile/${handle}`;
+            const mockReq = { user: req.user, body: { profileUrl } };
+            const mockRes = {
+                status: (code) => mockRes,
+                json: (data) => {
+                    console.log(`Codeforces scraping for ${handle} completed`);
+                }
+            };
+            
+            // Call the scraper in the background
+            scrapeCodeforcesProfile(mockReq, mockRes).catch(err => {
+                console.error(`Background Codeforces scrape for ${handle} failed:`, err.message);
+            });
+
+            res.status(202).json({ 
+                success: true,
+                message: `Accepted. Codeforces profile for ${handle} is being scraped.` 
+            });
+
+        } else if (platform === 'gfg') {
+            console.log(`Triggering GFG scrape for user ${supabase_id} with handle ${handle}`);
+            
+            // Create the profile URL from the handle
+            const profileUrl = `https://auth.geeksforgeeks.org/user/${handle}`;
+            const mockReq = { user: req.user, body: { profileUrl } };
+            const mockRes = {
+                status: (code) => mockRes,
+                json: (data) => {
+                    console.log(`GFG scraping for ${handle} completed`);
+                }
+            };
+            
+            // Call the scraper in the background
+            scrapeGfgProfile(mockReq, mockRes).catch(err => {
+                console.error(`Background GFG scrape for ${handle} failed:`, err.message);
+            });
+
+            res.status(202).json({ 
+                success: true,
+                message: `Accepted. GFG profile for ${handle} is being scraped.` 
+            });
+
+        } else {
+            // For other platforms, just confirm the update
+            res.status(200).json({
+                success: true,
+                message: `Platform ${platform} with handle ${handle} added successfully.`,
+                platforms: existingPlatforms
+            });
+        }
+    } catch (error) {
+        console.error('Add platform error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error adding platform',
             error: error.message
         });
     }

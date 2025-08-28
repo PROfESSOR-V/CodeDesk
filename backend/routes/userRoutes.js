@@ -1,9 +1,10 @@
 import { 
   getUserProfile,
-  syncSupabaseUser, 
   updateUserProfile,
   updateUserSections,
-  removePlatform
+  removePlatform,
+  getUserPortfolio,
+  syncUser
 } from '../controllers/userController.js';
 
 import express from "express";
@@ -11,12 +12,12 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 router.get("/profile", protect, getUserProfile);
-router.post("/sync", syncSupabaseUser);
 router.put("/profile", protect, updateUserProfile);
 router.put("/sections", protect, updateUserSections);
 router.delete("/platform", protect, removePlatform);
 
-// Portfolio route
-// portfolio endpoint removed
+// Portfolio and Sync routes
+router.get("/portfolio", protect, getUserPortfolio);
+router.post("/sync", protect, syncUser);
 
 export default router; 

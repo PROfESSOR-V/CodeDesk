@@ -8,6 +8,11 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
+import codeforcesRoutes from "./routes/codeforcesRoutes.js";
+import gfgRoutes from "./routes/gfgRoutes.js";
+import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
+import leetcodeRoutes from "./routes/leetcodeRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js"; // 2. Import the feedback routes
 // Removed legacy Mongo routes
 
 dotenv.config();
@@ -58,6 +63,12 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
+app.use("/api/codeforces", codeforcesRoutes);
+app.use("/api/gfg", gfgRoutes);
+app.use("/api/workspace", workspaceRoutes);
+app.use("/api/leetcode", leetcodeRoutes);
+app.use("/api/feedback", feedbackRoutes); 
+
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
