@@ -268,10 +268,7 @@ function Education({ profile, tokenState }) {
   const [entries, setEntries] = useState(profile?.education || []);
 
   const addEntry = () => {
-    setEntries((prev) => [
-      ...prev,
-      { id: Date.now(), degree: "", school: "", gradeType: "CGPA", score: "", from: {}, to: {} },
-    ]);
+    setEntries((prev) => [...prev, { id: Date.now(), degree: "", school: "", gradeType: "CGPA", score: "", from: {}, to: {} }]);
   };
   const updateEntry = (id, field, value) => {
     setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, [field]: value } : e)));
@@ -818,6 +815,13 @@ function Accounts({ profile, tokenState }) {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (profile) {
+      setUsername(profile.username || "");
+      setPhotoUrl(profile.photo_url || "");
+    }
+  }, [profile]);
+
   const updateUsername = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
@@ -897,12 +901,10 @@ function Accounts({ profile, tokenState }) {
             Update Password
           </button>
         </div>
-
-        {/* Photo modal */}
-        {photoModal && (
-          <VerifyModal code="Profile photo feature coming soon" onClose={() => setPhotoModal(false)} onVerify={() => {}} />
-        )}
       </div>
+      {photoModal && (
+        <VerifyModal code="Profile photo feature coming soon" onClose={() => setPhotoModal(false)} onVerify={() => {}} />
+      )}
     </ContentCard>
   );
 }
