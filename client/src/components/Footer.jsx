@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram,FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import BrandName from "./BrandName.jsx";
 
@@ -49,12 +49,12 @@ export default function Footer() {
           <h3 className="text-lg font-semibold mb-3">Legal</h3>
           <ul className="space-y-2">
             <li>
-              <button onClick={() => navigate("/terms")} className="hover:text-[#e67829]">
+              <button onClick={() => {navigate("/terms");window.scrollTo(0,0)}} className="hover:text-[#e67829]">
                 Terms & Conditions
               </button>
             </li>
             <li>
-              <button onClick={() => navigate("/privacy")} className="hover:text-[#e67829]">
+              <button onClick={() => {navigate("/privacy") ;window.scrollTo(0,0)}} className="hover:text-[#e67829]">
                 Privacy Policy
               </button>
             </li>
@@ -76,6 +76,9 @@ export default function Footer() {
             </a>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#e67829]">
               <FaInstagram />
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#e67829]">
+              <FaFacebook />
             </a>
           </div>
         </div>
