@@ -1,3 +1,4 @@
+import React from "react";
 import Sidebar from "./Sidebar.jsx";
 import TopBar from "./TopBar.jsx";
 import Home from "../pages/Home.jsx";
