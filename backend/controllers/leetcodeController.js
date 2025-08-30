@@ -39,21 +39,28 @@ export const scrapeLeetcodeProfile = asyncHandler(async (req, res) => {
       .from('leetcode_stats')
       .upsert({
         supabase_id: userId,
-        username: profileData.username,
-        display_name: profileData.displayName,
-        ranking: profileData.ranking,
-        total_solved: profileData.totalSolved,
+        profile_name: profileData.displayName,
+        total_questions: profileData.totalSolved,
         easy_solved: profileData.easySolved,
         medium_solved: profileData.mediumSolved,
         hard_solved: profileData.hardSolved,
-        active_days: profileData.activeDays,
-        current_streak: profileData.currentStreak,
-        contests_participated: profileData.contestsParticipated,
-        contest_rating: profileData.contestRating,
-        max_rating: profileData.maxRating,
-        contribution_data: profileData.contributionData,
-        country: profileData.country,
-        last_refreshed_at: new Date().toISOString(),
+        rating: profileData.contestRating || 0,
+        total_contests: profileData.contestsParticipated || 0,
+        badges: profileData.badges || [],
+        heatmap: profileData.contributionData || [],
+        today_count: profileData.todaySubmissions || 0,
+        raw_stats: {
+          username: profileData.username,
+          displayName: profileData.displayName,
+          ranking: profileData.ranking,
+          activeDays: profileData.activeDays,
+          currentStreak: profileData.currentStreak,
+          maxRating: profileData.maxRating,
+          country: profileData.country,
+          contributionGraphHtml: profileData.contributionGraphHtml
+        },
+        updated_at: new Date().toISOString(),
+        username: profileData.username
       }, { onConflict: 'supabase_id', ignoreDuplicates: false });
 
     if (dbError) {
@@ -185,10 +192,10 @@ async function removeFromUserPlatforms(userId, platform) {
 }
 
 async function updateTotalStats(userId) {
-  // Get LeetCode stats only
+  // Get LeetCode stats using correct field names
   const { data: leet } = await supabaseAdmin
     .from('leetcode_stats')
-    .select('total_solved, contests_participated, contribution_data')
+    .select('total_questions, total_contests, heatmap')
     .eq('supabase_id', userId)
     .single();
   if (!leet) return;
@@ -200,15 +207,15 @@ async function updateTotalStats(userId) {
     .eq('supabase_id', userId)
     .single();
 
-  const totalQuestions = (existing?.total_questions_solved || 0) + (leet.total_solved || 0);
-  const totalContests = (existing?.total_contests_attended || 0) + (leet.contests_participated || 0);
+  const totalQuestions = (existing?.total_questions_solved || 0) + (leet.total_questions || 0);
+  const totalContests = (existing?.total_contests_attended || 0) + (leet.total_contests || 0);
 
   // Merge activity arrays
   const activityMap = new Map();
   (existing?.unified_activity || []).forEach(({ date, count }) => {
     if (date) activityMap.set(date, count || 0);
   });
-  (leet.contribution_data || []).forEach(({ date, count }) => {
+  (leet.heatmap || []).forEach(({ date, count }) => {
     if (date) {
       activityMap.set(date, (activityMap.get(date) || 0) + (count || 0));
     }

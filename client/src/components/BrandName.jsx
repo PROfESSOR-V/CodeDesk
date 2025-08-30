@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function BrandName({ className = "", variant = "default" }) {
   const isWhite = variant === "white";
 

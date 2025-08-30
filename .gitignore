@@ -1,3 +1,25 @@
+
+node_modules/
+client/node_modules/
+backend/node_modules/
+
+**/node_modules/
+
+# Vite cache
+client/.vite/
+backend/.vite/
+dist/
+
+
+node_modules/
+client/node_modules/
+backend/node_modules/
+
+.vite/
+dist/
+
+client/vite.config.js
+
 # Dependencies
 **/node_modules/
 
@@ -27,5 +49,6 @@ temp/
 Thumbs.db
 .vscode/
 .idea/
+
 
 

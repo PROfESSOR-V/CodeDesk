@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaImage, FaGraduationCap, FaTrophy, FaBuilding, FaCode, FaLock, FaIdBadge, FaTrashAlt } from "react-icons/fa";
 import anime from "animejs";
@@ -119,7 +120,7 @@ export default function EditProfile() {
       <aside className="w-64 bg-white border-r p-6 hidden md:block">
         <button
           className="text-sm text-[#e67829] font-medium mb-6 flex items-center gap-2 transition-colors hover:text-orange-600"
-          onClick={() => window.history.back()}
+          onClick={() => navigate('/portfolio')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -267,10 +268,7 @@ function Education({ profile, tokenState }) {
   const [entries, setEntries] = useState(profile?.education || []);
 
   const addEntry = () => {
-    setEntries((prev) => [
-      ...prev,
-      { id: Date.now(), degree: "", school: "", gradeType: "CGPA", score: "", from: {}, to: {} },
-    ]);
+    setEntries((prev) => [...prev, { id: Date.now(), degree: "", school: "", gradeType: "CGPA", score: "", from: {}, to: {} }]);
   };
   const updateEntry = (id, field, value) => {
     setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, [field]: value } : e)));
@@ -672,26 +670,48 @@ function Platforms({ profile, tokenState }) {
                     // Extract username from URL
                     const username = platform.url.replace(baseUrls[platform.id], "").trim();
                     
-                    if (username && (platform.id === 'codeforces' || platform.id === 'gfg')) {
+                    if (username && (platform.id === 'codeforces' || platform.id === 'gfg' || platform.id === 'leetcode')) {
                       console.log(`Auto-triggering scraper for ${platform.id} with username: ${username}`);
                       
-                      // Call the platform add endpoint which auto-triggers scraping
-                      const scrapePromise = fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/platforms/add`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-                        body: JSON.stringify({ 
-                          platform: platform.id, 
-                          handle: username 
-                        }),
-                      }).then(response => {
-                        if (response.ok) {
-                          console.log(`${platform.id} scraping initiated for ${username}`);
-                        } else {
-                          console.error(`Failed to initiate ${platform.id} scraping for ${username}`);
-                        }
-                      }).catch(err => {
-                        console.error(`Error initiating ${platform.id} scraping:`, err);
-                      });
+                      let scrapePromise;
+                      
+                      if (platform.id === 'leetcode') {
+                        // Call LeetCode specific scraper endpoint
+                        scrapePromise = fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/leetcode/scrape`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+                          body: JSON.stringify({ 
+                            leetcodeUsername: username,
+                            profileUrl: platform.url
+                          }),
+                        }).then(response => {
+                          if (response.ok) {
+                            console.log(`${platform.id} scraping initiated for ${username}`);
+                          } else {
+                            console.error(`Failed to initiate ${platform.id} scraping for ${username}`);
+                          }
+                        }).catch(err => {
+                          console.error(`Error initiating ${platform.id} scraping:`, err);
+                        });
+                      } else {
+                        // Call the platform add endpoint for other platforms
+                        scrapePromise = fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/platforms/add`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+                          body: JSON.stringify({ 
+                            platform: platform.id, 
+                            handle: username 
+                          }),
+                        }).then(response => {
+                          if (response.ok) {
+                            console.log(`${platform.id} scraping initiated for ${username}`);
+                          } else {
+                            console.error(`Failed to initiate ${platform.id} scraping for ${username}`);
+                          }
+                        }).catch(err => {
+                          console.error(`Error initiating ${platform.id} scraping:`, err);
+                        });
+                      }
                       
                       scrapingPromises.push(scrapePromise);
                     }
@@ -795,6 +815,13 @@ function Accounts({ profile, tokenState }) {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (profile) {
+      setUsername(profile.username || "");
+      setPhotoUrl(profile.photo_url || "");
+    }
+  }, [profile]);
+
   const updateUsername = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
@@ -874,12 +901,10 @@ function Accounts({ profile, tokenState }) {
             Update Password
           </button>
         </div>
-
-        {/* Photo modal */}
-        {photoModal && (
-          <VerifyModal code="Profile photo feature coming soon" onClose={() => setPhotoModal(false)} onVerify={() => {}} />
-        )}
       </div>
+      {photoModal && (
+        <VerifyModal code="Profile photo feature coming soon" onClose={() => setPhotoModal(false)} onVerify={() => {}} />
+      )}
     </ContentCard>
   );
 }
