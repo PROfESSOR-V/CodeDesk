@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
 
 // Configuration for each platform's selectors and validation
 const PLATFORM_CONFIG = {
@@ -317,4 +317,4 @@ class PlatformVerificationController {
     }
 }
 
-module.exports = new PlatformVerificationController();
+export default new PlatformVerificationController();
