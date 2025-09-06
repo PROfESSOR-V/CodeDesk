@@ -140,9 +140,9 @@ export const getUserPortfolio = asyncHandler(async (req, res) => {
     // throw new Error(error.message);
   }
 
-  const unifiedActivity = Array.isArray(data?.heatmap)
-    ? data.heatmap
-    : (() => { try { return data?.heatmap ? JSON.parse(data.heatmap) : []; } catch { return []; } })();
+  const unifiedActivity = Array.isArray(data?.unified_activity)
+    ? data.unified_activity
+    : (() => { try { return data?.unified_activity ? JSON.parse(data.unified_activity) : []; } catch { return []; } })();
 
   const totalQuestions = data?.total_questions_solved || 0;
   const totalContests = data?.total_contests_attended || 0;

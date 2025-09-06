@@ -55,7 +55,6 @@ export async function upsertPlatformStats(platformId, supabaseId, stats) {
       stats.score ??
       0,
     total_contests: stats.contestsParticipated ?? 0,
-    badges: stats.badges ?? null,
     heatmap: stats.contributionData ?? null,
     today_count: getTodayHeatmapCount(stats.contributionData),
     raw_stats: stats ?? null,
@@ -101,8 +100,5 @@ export async function upsertPlatformStats(platformId, supabaseId, stats) {
     throw error;
   }
 
-  // Recompute total_stats in background (dynamic import to avoid cycle)
-  import('./totalStats.js').then(({ recomputeTotalStats }) => {
-    recomputeTotalStats(supabaseId).catch((e) => console.error('total_stats recompute failed', e.message));
-  });
+  // total_stats table disabled in prod; skip recompute
 }
