@@ -50,14 +50,15 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 // @route  PUT /api/users/sections
 // @access Private
 export const updateUserSections = asyncHandler(async (req, res) => {
-  const { education, achievements, workExperience, platforms } = req.body;
+  const { education, achievements, workExperience, platforms, username } = req.body;
 
   const payload = { supabase_id: req.user.id };
   if (education) payload.education = education;
   if (achievements) payload.achievements = achievements;
   if (workExperience) payload.work_experience = workExperience;
   if (platforms) payload.platforms = platforms;
-
+  if (username) payload.username = username;
+  
   const { error } = await supabaseAdmin.from("profiles").upsert(payload, { onConflict: "supabase_id" });
   if (error) throw new Error(error.message);
 
@@ -110,15 +111,33 @@ export const removePlatform = asyncHandler(async (req, res) => {
 // @route   GET /api/users/portfolio
 // @access  Private
 export const getUserPortfolio = asyncHandler(async (req, res) => {
+  const { recomputeTotalStats } = await import('../utils/totalStats.js');
+  await recomputeTotalStats(req.user.id);
+
   const { data, error } = await supabaseAdmin
     .from("total_stats")
-    .select("total_questions_solved, total_contests_attended, heatmap")
+    .select("total_questions_solved, total_contests_attended, heatmap,total_rating , easy_solved , medium_solved , hard_solved")
     .eq("supabase_id", req.user.id)
     .single();
 
+  const { data: verifiedPlatforms, error: platformError } = await supabaseAdmin
+    .from("profiles")
+    .select("platforms")
+    .eq("supabase_id", req.user.id)
+    .single();
+  const verifiedPlatformsData = verifiedPlatforms?.platforms || [];
+
+
+  if (platformError && platformError.code !== "PGRST116") {
+    console.error("Error fetching user platforms:", platformError);
+    throw new Error(platformError.message);
+  }
+
+  
+
   if (error && error.code !== "PGRST116") { // Ignore error if no row is found
     console.error("Error fetching user portfolio:", error);
-    throw new Error(error.message);
+    // throw new Error(error.message);
   }
 
   const unifiedActivity = Array.isArray(data?.heatmap)
@@ -131,16 +150,16 @@ export const getUserPortfolio = asyncHandler(async (req, res) => {
   // Shape response to what client/src/pages/Portfolio.jsx expects
   const response = {
     user: {},
-    verifiedPlatforms: [],
+    verifiedPlatforms: [...verifiedPlatformsData],
     aggregatedStats: {
-      totalQuestions,
+      totalQuestions: totalQuestions || 0,
       totalActiveDays: unifiedActivity.length || 0,
-      totalRating: 0,
-      totalContests,
+      totalRating: data.total_rating || 0,
+      totalContests: totalContests || 0,
       // The UI will further normalize these via problemDifficulty
-      easy: 0,
-      medium: 0,
-      hard: 0,
+      easy: data.easy_solved || 0,
+      medium: data.medium_solved || 0,
+      hard: data.hard_solved || 0,
     },
     unifiedActivity,
     contestRatings: [],

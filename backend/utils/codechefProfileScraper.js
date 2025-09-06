@@ -2,7 +2,6 @@ import { Builder, By, until, Key } from "selenium-webdriver";
 import chrome from "selenium-webdriver/chrome.js";
 import { supabase } from "../config/supabaseClient.js";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
 
 class CodeChefScraper {
     constructor() {
@@ -345,8 +344,7 @@ class CodeChefScraper {
     }
 
     // Enhanced scraping method with better error handling
-    async scrapeProfile(username) {
-        const scrapingLogId = uuidv4();
+    async scrapeProfile(username, user_id) {
         const startTime = Date.now();
 
         try {
@@ -368,7 +366,7 @@ class CodeChefScraper {
 
             // Store profile data
             await this.withRetry(
-                async () => await this.storeProfileData(profileData),
+                async () => await this.storeProfileData(profileData,user_id),
                 "Profile data storage"
             );
 
@@ -432,7 +430,13 @@ class CodeChefScraper {
                     ),
                     this.withRetry(
                         async () =>
-                            await this.updateProfileData(profileData,contests, activities),
+                            await this.updateProfileData(
+                                profileData,
+                                contests,
+                                activities,
+                                badges,
+                                heatmapData
+                            ),
                         "Update Profile Data storage"
                     ),
                 ]);
@@ -849,7 +853,7 @@ class CodeChefScraper {
                         if (date && count) {
                             heatmapData.push({
                                 date: new Date(date),
-                                submission_count: parseInt(count),
+                                count: parseInt(count),
                                 level: parseInt(category) || 0,
                             });
                         }
@@ -907,13 +911,13 @@ class CodeChefScraper {
 
         try {
             // Wait for the activities table to load completely
-            await this.waitForElement(".dataTable tbody tr", 15000);
+            await this.waitForElement(".dataTable tbody tr", 9000);
 
             let hasNextPage = true;
             let pageCount = 0;
             let consecutiveEmptyPages = 0;
 
-            while (hasNextPage) {
+            while (hasNextPage && pageCount <= 20) {
                 if (consecutiveEmptyPages) continue; // Skip if empty pages
                 console.log(`Processing activities page ${pageCount + 1}...`);
 
@@ -952,7 +956,15 @@ class CodeChefScraper {
                                 By.css("a")
                             );
                             const problemCode = await problemElement.getText();
+                            if (!problemCode) {
+                                console.log("Skipping row with no problem code");
+                                continue;
+                            }
 
+                            const prob_resp = await fetch(`https://www.codechef.com/api/contests/PRACTICE/problems/${problemCode}`)
+                            const problemData = await prob_resp.json();
+                            const difficulty_rating = problemData.difficulty_rating
+                            
                             // Get result and language
                             const resultText = await cells[2].getText();
                             const result =
@@ -961,13 +973,14 @@ class CodeChefScraper {
 
                             if (time && problemCode) {
                                 activities.push({
-                                    profile_id: profileId,
+                                    supabase_id: profileId,
                                     submission_time: time,
                                     problem_code: problemCode,
+                                    difficulty_rating: difficulty_rating,
                                     result: result,
                                     language: language,
                                 });
-                                rowsProcessed++;
+                                rowsProcessed = rowsProcessed + 1;
                             }
                         }
                     } catch (rowError) {
@@ -994,32 +1007,33 @@ class CodeChefScraper {
                 try {
                     let isEnabled = false;
                     let isDisplayed = false;
-                    let nextButton = null; 
+                    let nextButton = null;
                     // Try multiple selectors for the next button
-                    const nextSelector = 'a[onclick*="next"]'
-                        try {
-                            const element = await this.driver.findElement(
-                                By.css(nextSelector)
-                            );
-                                isEnabled = await element.isEnabled();
-                                isDisplayed = await element.isDisplayed();
-                                if (isEnabled && isDisplayed) {
-                                    nextButton = element;
-                                }
-                                console.log(`Next button - Enabled: ${isEnabled}, Displayed: ${isDisplayed}`);
-                        } catch (e) {
-                            console.log(`Error in Selector`)
+                    const nextSelector = 'a[onclick*="next"]';
+                    try {
+                        const element = await this.driver.findElement(
+                            By.css(nextSelector)
+                        );
+                        isEnabled = await element.isEnabled();
+                        isDisplayed = await element.isDisplayed();
+                        if (isEnabled && isDisplayed) {
+                            nextButton = element;
                         }
+                        console.log(
+                            `Next button - Enabled: ${isEnabled}, Displayed: ${isDisplayed}`
+                        );
+                    } catch (e) {
+                        console.log(`Error in Selector`);
+                    }
 
                     if (nextButton) {
-                        
                         await this.driver.sleep(1000);
 
                         await nextButton.click();
 
                         // Consistent delay between pages
-                        await this.driver.sleep(3000);
-                        pageCount++;
+                        await this.driver.sleep(1000);
+                        pageCount = pageCount + 1;
                     } else {
                         hasNextPage = false;
                         console.log("Next button not found");
@@ -1032,9 +1046,10 @@ class CodeChefScraper {
 
             console.log(
                 `Extracted ${activities.length} activities from ${
-                    pageCount + 1
+                    pageCount
                 } pages`
             );
+
             return activities;
         } catch (error) {
             console.error("Error extracting recent activity:", error);
@@ -1042,42 +1057,40 @@ class CodeChefScraper {
         }
     }
 
-    async storeProfileData(profileData) {
+    async storeProfileData(profileData, user_id) {
         try {
             // Insert or update profile
             const { data: existingProfile } = await supabase
                 .from("codechef_profiles")
-                .select("id")
+                .select("supabase_id")
                 .eq("username", profileData.username)
                 .single();
 
             const profileUpdateData = {
-                username: profileData.username,
                 profile_name: profileData.profile_name,
+                username: profileData.username,
                 rating: profileData.rating,
-                star_level: profileData.star_level,
-                division: profileData.division,
-                global_rank: profileData.global_rank,
-                country_rank: profileData.country_rank,
-                country: profileData.country,
-                institute: profileData.institute,
-                updated_at: new Date(),
                 last_scraped_at: new Date(),
             };
 
             if (existingProfile) {
-                this.profileId = existingProfile.id;
-                await supabase
+                this.profileId = existingProfile.supabase_id;
+                const { error: updateError } = await supabase
                     .from("codechef_profiles")
                     .update(profileUpdateData)
-                    .eq("id", this.profileId);
+                    .eq("supabase_id", this.profileId);
+                if (updateError) throw updateError;
             } else {
-                this.profileId = uuidv4();
-                await supabase.from("codechef_profiles").insert({
-                    id: this.profileId,
-                    ...profileUpdateData,
-                    created_at: new Date(),
-                });
+                this.profileId = user_id
+
+                const { error: insertError } = await supabase
+                    .from("codechef_profiles")
+                    .insert({
+                        supabase_id: this.profileId,
+                        ...profileUpdateData,
+                        created_at: new Date(),
+                    });
+                if (insertError) throw insertError;
             }
 
             console.log(
@@ -1090,44 +1103,56 @@ class CodeChefScraper {
         }
     }
 
-    async updateProfileData(profileData,contests, activities) {
-
+    async updateProfileData(
+        profileData,
+        contests,
+        activities,
+        badges,
+        heatmap
+    ) {
         const { data: existingProfile } = await supabase
-                .from("codechef_profiles")
-                .select("id")
-                .eq("username", profileData.username)
-                .single();
+            .from("codechef_profiles")
+            .select("supabase_id")
+            .eq("username", profileData.username)
+            .single();
 
         try {
-            if (this.profileId != existingProfile?.id) {
+            if (!this.profileId) {
                 throw new Error(
                     "Profile ID not set. Cannot update profile data."
                 );
             }
 
             const profileUpdateData = {
-                contests_participated: contests.length,
-                total_problems_solved: (
-                    await this.calculateProblems(activities)
-                ).solved,
-                total_problems: (await this.calculateProblems(activities))
-                    .total
+                badges: badges,
+                heatmap: heatmap,
+                total_contests: contests.length,
+                total_questions: (await this.calculateProblems(activities))
+                    .total,
+                raw_stats: {
+                    star_level: profileData.star_level,
+                    division: profileData.division,
+                    global_rank: profileData.global_rank,
+                    country_rank: profileData.country_rank,
+                    country: profileData.country,
+                    institute: profileData.institute,
+                    total_problems_solved: (
+                        await this.calculateProblems(activities)
+                    ).solved,
+                },
+                updated_at: new Date(Date.now()),
             };
 
             const { error } = await supabase
                 .from("codechef_profiles")
                 .update(profileUpdateData)
-                .eq("id", this.profileId);
+                .eq("supabase_id", this.profileId);
 
-            if (error){
+            if (error) {
                 console.error("Error updating profile data:", error);
                 throw error;
-            } 
+            }
 
-            console.log(
-                "Profile data updated successfully:",
-                profileUpdateData
-            );
         } catch (error) {
             console.error("Error updating profile data:", error);
             throw error;
@@ -1150,12 +1175,12 @@ class CodeChefScraper {
             await supabase
                 .from("codechef_rating_history")
                 .delete()
-                .eq("profile_id", this.profileId);
+                .eq("supabase_id", this.profileId);
 
             // Insert new rating history
             const ratingData = ratingHistory.map((rating) => ({
                 id: uuidv4(),
-                profile_id: this.profileId,
+                supabase_id: this.profileId,
                 ...rating,
             }));
 
@@ -1178,7 +1203,7 @@ class CodeChefScraper {
             await supabase
                 .from("codechef_contests")
                 .delete()
-                .eq("profile_id", this.profileId);
+                .eq("supabase_id", this.profileId);
 
             // Create an object to track unique contests
             const uniqueContests = {};
@@ -1197,7 +1222,7 @@ class CodeChefScraper {
                 ) {
                     uniqueContests[key] = {
                         id: uuidv4(),
-                        profile_id: this.profileId,
+                        supabase_id: this.profileId,
                         created_at: new Date(),
                         ...contest,
                     };
@@ -1257,7 +1282,7 @@ class CodeChefScraper {
                 if (this.isValidDate(dateKey)) {
                     const submissionCount = Math.max(
                         0,
-                        parseInt(entry.submission_count) || 0
+                        parseInt(entry.count) || 0
                     );
                     const level = Math.max(
                         0,
@@ -1267,11 +1292,11 @@ class CodeChefScraper {
                     if (
                         !uniqueEntries.has(dateKey) ||
                         submissionCount >
-                            uniqueEntries.get(dateKey).submission_count
+                            uniqueEntries.get(dateKey).count
                     ) {
                         uniqueEntries.set(dateKey, {
                             date: dateKey,
-                            submission_count: submissionCount,
+                            count: submissionCount,
                             level: level,
                         });
                     }
@@ -1293,7 +1318,7 @@ class CodeChefScraper {
             const { error: deleteError } = await client
                 .from("codechef_heatmap")
                 .delete()
-                .eq("profile_id", this.profileId);
+                .eq("supabase_id", this.profileId);
 
             if (deleteError) {
                 console.error(
@@ -1316,9 +1341,9 @@ class CodeChefScraper {
                 const batch = cleanedData.slice(i, i + batchSize);
 
                 const insertData = batch.map((entry) => ({
-                    profile_id: this.profileId,
+                    supabase_id: this.profileId,
                     date: entry.date,
-                    submission_count: entry.submission_count,
+                    count: entry.count,
                     level: entry.level,
                     created_at: new Date().toISOString(),
                 }));
@@ -1392,7 +1417,7 @@ class CodeChefScraper {
             await supabase
                 .from("codechef_badges")
                 .delete()
-                .eq("profile_id", this.profileId);
+                .eq("supabase_id", this.profileId);
 
             // Filter out duplicates before inserting
             const uniqueBadges = badges.reduce((acc, badge) => {
@@ -1400,7 +1425,7 @@ class CodeChefScraper {
                 if (!acc[key]) {
                     acc[key] = {
                         id: uuidv4(),
-                        profile_id: this.profileId,
+                        supabase_id: this.profileId,
                         ...badge,
                     };
                 }
@@ -1446,10 +1471,9 @@ class CodeChefScraper {
             // Validate first record to ensure correct structure
             if (problemsData.length > 0) {
                 const sampleRecord = problemsData[0];
-                console.log("Sample record structure:", sampleRecord);
 
                 // Check required fields
-                const requiredFields = ["profile_id", "problem_code"];
+                const requiredFields = ["supabase_id", "problem_code"];
                 const missingFields = requiredFields.filter(
                     (field) => !sampleRecord[field]
                 );
@@ -1465,7 +1489,7 @@ class CodeChefScraper {
             const { data: existingData, error: checkError } = await supabase
                 .from("codechef_total_problems")
                 .select("id")
-                .eq("profile_id", profileId)
+                .eq("supabase_id", profileId)
                 .limit(1);
 
             if (checkError) {
@@ -1483,7 +1507,7 @@ class CodeChefScraper {
                 const { error: deleteError } = await supabase
                     .from("codechef_total_problems")
                     .delete()
-                    .eq("profile_id", profileId);
+                    .eq("supabase_id", profileId);
 
                 if (deleteError) {
                     throw new Error(
@@ -1588,11 +1612,12 @@ class CodeChefScraper {
     // Correct way to prepare data for insertion
     prepareCodeChefData(rawScrapedData, profileId) {
         return rawScrapedData.map((item) => ({
-            profile_id: profileId,
+            supabase_id: profileId,
             submission_time: item.time
                 ? new Date(item.time).toISOString()
                 : new Date().toISOString(),
             problem_code: item.problem_code,
+            difficulty_rating: item.difficulty_rating,
             result: parseFloat(item.result) || 0,
             language: item.language || null,
             created_at: new Date().toISOString(),
@@ -1604,7 +1629,7 @@ class CodeChefScraper {
         await supabase.from("codechef_scraping_logs").insert({
             id: logId,
             username,
-            profile_id: this.profileId,
+            supabase_id: this.profileId,
             scraping_started_at: new Date(),
             status: "started",
             scraper_version: "1.0.0",
@@ -1672,20 +1697,9 @@ class CodeChefScraper {
             return { total: 0, solved: 0 };
         }
 
-        // Remove duplicates based on problem_code and submission_time
-        const uniqueActivities = activities.filter((activity, index, self) => {
-            return (
-                index ===
-                self.findIndex(
-                    (a) =>
-                        a.problem_code === activity.problem_code &&
-                        a.submission_time === activity.submission_time
-                )
-            );
-        });
 
-        const totalProblems = uniqueActivities.length;
-        const solvedProblems = uniqueActivities.filter(
+        const totalProblems = activities.length;
+        const solvedProblems = activities.filter(
             (activity) => activity.result === 100
         ).length;
 

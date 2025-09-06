@@ -27,14 +27,14 @@ export const refreshRateLimit = rateLimit({
 
 // Basic profile scraping
 export const scrapeProfile = async (req, res) => {
-  const { username } = req.body;
+  const { username,supabase_id } = req.body;
   const scraper = new CodeChefScraper();
 
   try {
     console.log(`🔄 Starting scrape for ${username}`);
     
     await scraper.initializeBrowser();
-    const result = await scraper.scrapeProfile(username);
+    const result = await scraper.scrapeProfile(username,supabase_id);
 
     res.json({
       success: true,
@@ -65,36 +65,58 @@ export const getProfile = async (req, res) => {
   try {
     console.log(`📖 Fetching profile for ${username}`);
 
-    const { data: profile, error } = await supabase
+    // First get the profile
+    const { data: profile, error: profileError } = await supabase
       .from('codechef_profiles')
-      .select(`
-        *,
-        codechef_rating_history(*),
-        codechef_contests(*),
-        codechef_heatmap(*),
-        codechef_badges(*)
-      `)
+      .select('*')
       .eq('username', username)
       .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
+    if (profileError) {
+      if (profileError.code === 'PGRST116') {
         return res.status(404).json({
           success: false,
           message: 'Profile not found'
         });
       }
-      throw error;
+      throw profileError;
     }
 
-    const dataAge = Date.now() - new Date(profile.last_scraped_at).getTime();
+    // Get related data using supabase_id
+    const [ratingHistory, contests, heatmap, badges] = await Promise.all([
+      supabase.from('codechef_rating_history')
+        .select('*')
+        .eq('supabase_id', profile.supabase_id),
+      supabase.from('codechef_contests')
+        .select('*')
+        .eq('supabase_id', profile.supabase_id),
+      supabase.from('codechef_heatmap')
+        .select('*')
+        .eq('supabase_id', profile.supabase_id),
+      supabase.from('codechef_badges')
+        .select('*')
+        .eq('supabase_id', profile.supabase_id)
+    ]);
+
+    // Combine the data
+    const fullProfile = {
+      ...profile,
+      codechef_rating_history: ratingHistory.data || [],
+      codechef_contests: contests.data || [],
+      codechef_heatmap: heatmap.data || [],
+      codechef_badges: badges.data || []
+    };
+
+    const error = null;
+
+    const dataAge = Date.now() - new Date(fullProfile.last_scraped_at).getTime();
     const needsRefresh = dataAge > 24 * 60 * 60 * 1000; // 24 hours
 
     res.json({
       success: true,
-      profile,
+      profile: fullProfile,
       metadata: {
-        lastScraped: profile.last_scraped_at,
+        lastScraped: fullProfile.last_scraped_at,
         dataAgeHours: Math.floor(dataAge / (1000 * 60 * 60)),
         needsRefresh
       }
@@ -164,16 +186,28 @@ export const getHeatmap = async (req, res) => {
   try {
     console.log(`🗓️ Fetching heatmap for ${username}`);
 
+    // First get the profile ID
+    const { data: profileData, error: profileError } = await supabase
+      .from('codechef_profiles')
+      .select('supabase_id')
+      .eq('username', username)
+      .single();
+
+    if (profileError) {
+      if (profileError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Profile not found'
+        });
+      }
+      throw profileError;
+    }
+
+    // Get heatmap data
     const { data: heatmap, error } = await supabase
       .from('codechef_heatmap')
-      .select('date, submission_count')
-      .eq('profile_id', (
-        await supabase
-          .from('codechef_profiles')
-          .select('id')
-          .eq('username', username)
-          .single()
-      ).data.id)
+      .select('date, count')
+      .eq('supabase_id', profileData.supabase_id)
 
     if (error) throw error;
 
@@ -201,50 +235,50 @@ export const getHeatmap = async (req, res) => {
 
 // Get activities data
 export const getActivities = async (req, res) => {
-  const { username } = req.params;
+  // const { username } = req.params;
 
-  try {
-    console.log(`📊 Fetching activities for ${username}`);
+  // try {
+  //   console.log(`📊 Fetching activities for ${username}`);
 
-    const { data: profile, error } = await supabase
-      .from('codechef_profiles')
-      .select('total_problems_solved, total_problems')
-      .eq('username', username)
-      .single();
+  //   const { data: profile, error } = await supabase
+  //     .from('codechef_profiles')
+  //     .select('total_problems_solved, total_problems')
+  //     .eq('username', username)
+  //     .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({
-          success: false,
-          message: 'Profile not found'
-        });
-      }
-      throw error;
-    }
+  //   if (error) {
+  //     if (error.code === 'PGRST116') {
+  //       return res.status(404).json({
+  //         success: false,
+  //         message: 'Profile not found'
+  //       });
+  //     }
+  //     throw error;
+  //   }
 
-    res.json({
-      success: true,
-      activities: {
-        totalProblems: profile.total_problems,
-        solvedProblems: profile.total_problems_solved
-      }
-    });
+  //   res.json({
+  //     success: true,
+  //     activities: {
+  //       totalProblems: profile.total_problems,
+  //       solvedProblems: profile.total_problems_solved
+  //     }
+  //   });
 
-  } catch (error) {
-    console.error('Activities fetch error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch activities',
-      message: error.message
-    });
-  }
+  // } catch (error) {
+  //   console.error('Activities fetch error:', error);
+  //   res.status(500).json({
+  //     success: false,
+  //     error: 'Failed to fetch activities',
+  //     message: error.message
+  //   });
+  // }
 };
 
 
 export const healthCheck = async (req, res) => {
   try {
     const scraper = new CodeChefScraper();
-    await scraper.initialize();
+    await scraper.initializeBrowser();
     await scraper.cleanup();
 
     const { data, error } = await supabase.from('codechef_profiles').select('count');
@@ -358,23 +392,23 @@ export const refreshProfile = async (req, res) => {
     const [ratingHistory, contests, heatmap, badges] = await Promise.allSettled([
       supabase.from('codechef_rating_history')
         .select('new_rating, contest_name, contest_date')
-        .eq('profile_id', basicProfile.id)
+        .eq('supabase_id', basicProfile.id)
         .order('contest_date', { ascending: false }),
       
       // AVOID rank column that might be causing issues
       supabase.from('codechef_contests')
         .select('contest_name, rating_change')
-        .eq('profile_id', basicProfile.id)
+        .eq('supabase_id', basicProfile.id)
         .order('contest_date', { ascending: false }),
         
       supabase.from('codechef_heatmap')
         .select('date, submission_count, problems_solved')
-        .eq('profile_id', basicProfile.id)
+        .eq('supabase_id', basicProfile.id)
         .order('date', { ascending: false }),
         
       supabase.from('codechef_badges')
         .select('badge_name, earned_date')
-        .eq('profile_id', basicProfile.id)
+        .eq('supabase_id', basicProfile.id)
         .order('earned_date', { ascending: false })
     ]);
 
