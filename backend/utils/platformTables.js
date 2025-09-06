@@ -7,7 +7,7 @@ export const PLATFORM_TABLES = {
   leetcode: "leetcode_stats",
   codeforces: "codeforces_stats",
   gfg: "gfg_stats",
-  codechef: "codechef_stats",
+  codechef: "codechef_profiles",
   hackerrank: "hackerrank_stats",
 };
 
