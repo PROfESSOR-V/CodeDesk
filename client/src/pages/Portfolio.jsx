@@ -287,15 +287,15 @@ const Portfolio = () => {
 
     const fetchCodeChefData = async () => {
         try {
-            // TESTING: Bypass verification check
-            const username = "potato167"; // Replace with actual username
 
             // Get user's CodeChef username from profile
             const profile = portfolioData?.verifiedPlatforms?.find(
                 (p) => p.id === "codechef"
             );
 
-            if (!profile?.verified) console.log("verified :", portfolioData?.verifiedPlatforms);
+            if (!profile?.verified) return;
+
+            const username = profile?.url.split('/').pop()
 
             const baseUrl = `${
                 import.meta.env.VITE_API_URL || "http://localhost:5000"
