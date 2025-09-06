@@ -911,13 +911,13 @@ class CodeChefScraper {
 
         try {
             // Wait for the activities table to load completely
-            await this.waitForElement(".dataTable tbody tr", 9000);
+            await this.waitForElement(".dataTable tbody tr", 15000);
 
             let hasNextPage = true;
             let pageCount = 0;
             let consecutiveEmptyPages = 0;
 
-            while (hasNextPage && pageCount <= 20) {
+            while (hasNextPage) {
                 if (consecutiveEmptyPages) continue; // Skip if empty pages
                 console.log(`Processing activities page ${pageCount + 1}...`);
 
