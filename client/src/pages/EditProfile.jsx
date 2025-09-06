@@ -1126,7 +1126,7 @@ function Accounts({ profile }) {
                   "Content-Type": "application/json", 
                   Authorization: `Bearer ${tokenState}` 
                 },
-                body: JSON.stringify({ username }),
+                body: JSON.stringify({ username:username }),
               });
               alert("Username updated successfully");
             } catch (err) {

@@ -18,11 +18,13 @@ const ContributionHeatmap = ({ activity = [] }) => {
    * ---------------------------------------------------------- */
   const contributionsMap = useMemo(() => {
     const map = new Map();
-    activity.forEach(({ date, count }) => {
+    activity.forEach(({ date,count }) => {
       if (date) map.set(date, count);
     });
     return map;
   }, [activity]);
+
+  console.log("map: ",contributionsMap)
 
   /* ------------------------------------------------------------
    * 2. Local state – currently selected period
@@ -59,6 +61,8 @@ const ContributionHeatmap = ({ activity = [] }) => {
     }
     return map;
   }, [selectedYear, contributionsMap, today]);
+
+  console.log("period cotri :",periodContributions)
 
   /* ------------------------------------------------------------
    * 4. Stats helpers
@@ -128,7 +132,7 @@ const ContributionHeatmap = ({ activity = [] }) => {
     for (let day = 1; day <= daysInMonth; day++) {
       const cellDate = new Date(year, month, day);
       if (cellDate > today) continue; // don't render future dates
-      const iso = cellDate.toISOString().slice(0, 10);
+      const iso = cellDate.toISOString()
       const cnt = periodContributions.get(iso) || 0;
       cells.push(
         <div
