@@ -39,32 +39,6 @@ CodeDesk is a full-stack web application designed to help developers and learner
   <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
 </div>
 
-<h2 align="center">🎯 Open Source Programmes ⭐</h2>
-
-<p align="center">
-  <b>This project is now OFFICIALLY accepted for:</b>
-</p>
-
-
-🌟 **Exciting News...**
-
-🚀 This project is now an official part of GirlScript Summer of Code – GSSoC'25! 💃🎉💻 We're thrilled to welcome contributors from all over India and beyond to collaborate, build, and grow. Let’s make learning and career development smarter – together! 🌟👨‍💻👩‍💻
-
-👩‍💻 GSSoC is one of India’s **largest 3-month-long open-source programs** that encourages developers of all levels to contribute to real-world projects 🌍 while learning, collaborating, and growing together. 🌱
-
-🌈 With **mentorship, community support**, and **collaborative coding**, it's the perfect platform for developers to:
-
-✨ Improve their skills
-🤝 Contribute to impactful projects
-🏆 Get recognized for their work
-📜 Receive certificates and swag!
-
-🎉 **I can’t wait to welcome new contributors** from GSSoC 2025 to this CodeDesk project family!
-Let's build, learn, and grow together — one commit at a time. 🔥👨‍💻👩‍💻
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
 
 🔮 Coming Soon: AI-Powered Performance Tracking!
 An intelligent system to analyze user activity and visualize progress with interactive graphs.
