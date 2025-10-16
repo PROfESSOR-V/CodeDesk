@@ -3,13 +3,18 @@ import dotenv from "dotenv";
 import cors from "cors";
 // Mongo connection removed
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import { startDailyRefresh } from "./utils/scheduler.js";
 
 // Route files
 import userRoutes from "./routes/userRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import verificationRoutes from "./routes/verificationRoutes.js";
 import codeforcesRoutes from "./routes/codeforcesRoutes.js";
+
+import CodeChefRouter from "./routes/codechefRoutes.js";
+
 import gfgRoutes from "./routes/gfgRoutes.js";
+
 import workspaceRoutes from "./routes/workspaceRoutes.js"; // 1. Import the new workspace routes
 import leetcodeRoutes from "./routes/leetcodeRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js"; // 2. Import the feedback routes
@@ -64,6 +69,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/platforms", platformRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/codeforces", codeforcesRoutes);
+
+app.use("/api/codechef" , CodeChefRouter)
+
 app.use("/api/gfg", gfgRoutes);
 app.use("/api/workspace", workspaceRoutes);
 app.use("/api/leetcode", leetcodeRoutes);
@@ -77,4 +85,8 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  startDailyRefresh();
+});

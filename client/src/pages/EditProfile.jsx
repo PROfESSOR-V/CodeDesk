@@ -876,21 +876,37 @@ function Accounts({ profile, tokenState }) {
           </div>
         </div>
 
-        {/* Username */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">CodeDesk ID (username)</label>
-          <div className="flex">
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full border rounded-l-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="your_username"
-            />
-            <button onClick={updateUsername} className="bg-blue-600 text-white px-4 py-2 rounded-r-md text-sm font-medium hover:bg-blue-700 transition-colors">
-              Update
-            </button>
-          </div>
-        </div>
+      {/* Username */}
+      <div>
+        <label className="block text-sm font-medium mb-1">CodeDesk ID (username)</label>
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          placeholder="your_username"
+        />
+        <button 
+          onClick={async () => {
+            try {
+              await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/sections`, {
+                method: "PUT",
+                headers: { 
+                  "Content-Type": "application/json", 
+                  Authorization: `Bearer ${tokenState}` 
+                },
+                body: JSON.stringify({ username:username }),
+              });
+              alert("Username updated successfully");
+            } catch (err) {
+              alert("Error updating username");
+            }
+          }}
+          className="mt-2 bg-blue-600 text-white px-4 py-1.5 rounded text-sm"
+        >
+          Update Username
+        </button>
+      </div>
+
 
         {/* Password change */}
         <div className="space-y-2">
