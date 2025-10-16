@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const platformVerificationController = require('./controllers/platformVerificationController');
+import express from 'express';
+import cors from 'cors';
+import platformVerificationController from './controllers/platformVerificationController.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
