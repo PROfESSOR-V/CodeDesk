@@ -1,3 +1,6 @@
+ 
+ import listEndpoints from "express-list-endpoints";
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -78,6 +81,8 @@ app.use("/api/leetcode", leetcodeRoutes);
 
 // Healthcheck
 app.get("/", (req, res) => res.send("CodeDesk API is running"));
+ 
+console.log(listEndpoints(app));
 
 app.use(notFound);
 app.use(errorHandler);
